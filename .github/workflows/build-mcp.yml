@@ -1,0 +1,36 @@
+name: Build MCP Server
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mcp-server/**'
+  pull_request:
+    paths:
+      - 'mcp-server/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        working-directory: ./mcp-server
+        run: npm install
+      
+      - name: Build MCP server
+        working-directory: ./mcp-server
+        run: npm run build
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-server-dist
+          path: mcp-server/dist/

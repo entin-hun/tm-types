@@ -1,0 +1,26 @@
+{
+  "name": "@tracemarket/types-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for managing Trace Market type definitions",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "tm-types-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8",
+    "typescript": "^5.3.3",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/jsonwebtoken": "^9.0.7"
+  }
+}

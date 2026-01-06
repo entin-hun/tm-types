@@ -1,2 +1,8 @@
 node_modules
 yarn-error.log
+dist
+*.log
+.env
+.DS_Store
+mcp-server/dist
+mcp-server/node_modules
