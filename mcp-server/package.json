@@ -1,5 +1,5 @@
 {
-  "name": "@tracemarket/types-mcp-server",
+  "name": "@trace.market/types-mcp-server",
   "version": "0.1.0",
   "description": "MCP server for managing Trace Market type definitions",
   "type": "module",

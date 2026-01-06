@@ -1,5 +1,5 @@
 {
-  "name": "@tracemarket/types",
+  "name": "@trace.market/types",
   "version": "0.1.0",
   "description": "TypeScript type definitions for Trace Market food supply chain data",
   "author": "Trace Market Team",
@@ -8,7 +8,7 @@
   "main": "src/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/entin-hun/tm-types.git"
+    "url": "git+https://github.com/entin-hun/tm-types.git"
   },
   "keywords": [
     "typescript",

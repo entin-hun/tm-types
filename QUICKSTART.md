@@ -129,12 +129,13 @@ Generate a summary report for this product data:
 ### Publishing Process
 
 The CI/CD is configured to automatically publish when:
+To switch from `@fairfooddata/types` to `@trace.market/types`:
 1. You push to main branch
 2. The version in package.json has changed
 3. TypeScript validation passes
 
 **To publish a new version:**
-
+npm install @trace.market/types
 ```bash
 # 1. Update version
 npm version patch  # or minor, or major
@@ -144,26 +145,22 @@ git push origin main
 
 # 3. GitHub Actions will automatically:
 #    - Validate types
-#    - Publish to npm
+import { FoodInstance } from '@trace.market/types';
 #    - Create git tag
 #    - Create GitHub release
 ```
 
 ### Manual Publishing (if needed)
-
-```bash
-npm publish --access public
 ```
 
 ## Migrating Projects
 
-To switch from `@fairfooddata/types` to `@tracemarket/types`:
-
+- Check npm registry: `npm view @trace.market/types`
 ### 1. Update package.json
 
 ```bash
 npm uninstall @fairfooddata/types
-npm install @tracemarket/types
+npm install @trace.market/types
 ```
 
 ### 2. Update Imports
@@ -173,14 +170,14 @@ npm install @tracemarket/types
 import { FoodInstance } from '@fairfooddata/types';
 
 // New  
-import { FoodInstance } from '@tracemarket/types';
+import { FoodInstance } from '@trace.market/types';
 ```
 
 ### 3. Run Find & Replace
 
 In VS Code:
 - Find: `@fairfooddata/types`
-- Replace: `@tracemarket/types`
+- Replace: `@trace.market/types`
 - Replace in all files across workspace
 
 ## Adding New Types
@@ -226,7 +223,7 @@ echo '{"method":"tools/list"}' | node dist/index.js
 
 ### Types not updating
 - Clear node_modules cache: `rm -rf node_modules package-lock.json && npm install`
-- Check npm registry: `npm view @tracemarket/types`
+- Check npm registry: `npm view @trace.market/types`
 - Verify version number incremented
 
 ### MCP server not responding

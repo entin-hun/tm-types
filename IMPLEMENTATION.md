@@ -3,7 +3,7 @@
 ## ✅ Completed Setup
 
 ### 1. Package Configuration
-- **Name changed**: `@fairfooddata/types` → `@tracemarket/types`
+- **Name changed**: `@fairfooddata/types` → `@trace.market/types`
 - **Version**: 0.1.0
 - **License**: MIT (was UNLICENSED)
 - **Repository**: Linked to https://github.com/entin-hun/tm-types
@@ -63,7 +63,7 @@ All types from `@fairfooddata/types@0.0.6` are preserved:
 
 ### Install Package
 ```bash
-npm install @tracemarket/types
+npm install @trace.market/types
 ```
 
 ### Configure MCP in Copilot
@@ -108,7 +108,7 @@ JWT_SECRET="your-secret" node generate-token.js userId role
 1. **Update dependencies:**
    ```bash
    npm uninstall @fairfooddata/types
-   npm install @tracemarket/types
+  npm install @trace.market/types
    ```
 
 2. **Find & replace imports:**
@@ -117,7 +117,7 @@ JWT_SECRET="your-secret" node generate-token.js userId role
    import { FoodInstance } from '@fairfooddata/types';
    
    // New
-   import { FoodInstance } from '@tracemarket/types';
+  import { FoodInstance } from '@trace.market/types';
    ```
 
 3. **Test builds:**
@@ -151,7 +151,7 @@ JWT_SECRET="your-secret" node generate-token.js userId role
 4. Test first publish: `npm version patch && git push`
 
 ### Near Term
-1. Migrate tm-editor to use @tracemarket/types
+1. Migrate tm-editor to use @trace.market/types
 2. Migrate other projects (tm-marketplace, tm-list, etc.)
 3. Document new types that need to be added
 4. Set up user authentication system for MCP
@@ -196,4 +196,4 @@ JWT_SECRET="your-secret" node generate-token.js userId role
 
 - Repository: https://github.com/entin-hun/tm-types
 - Issues: https://github.com/entin-hun/tm-types/issues
-- npm: https://www.npmjs.com/package/@tracemarket/types (pending first publish)
+- npm: https://www.npmjs.com/package/@trace.market/types (pending first publish)

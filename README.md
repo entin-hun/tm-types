@@ -1,4 +1,4 @@
-# @tracemarket/types
+# @trace.market/types
 
 TypeScript type definitions for the Trace Market food supply chain traceability platform.
 
@@ -13,7 +13,7 @@ This package provides comprehensive TypeScript types for food traceability data,
 ## Installation
 
 ```bash
-npm install @tracemarket/types
+npm install @trace.market/types
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ import {
   Pokedex,
   SaleProcess,
   Impact
-} from '@tracemarket/types';
+} from '@trace.market/types';
 
 const product: FoodInstance = {
   category: 'food',
@@ -131,7 +131,7 @@ Update the version in `package.json` before committing changes that should trigg
 ## Repository
 
 - **GitHub**: https://github.com/entin-hun/tm-types
-- **npm**: https://www.npmjs.com/package/@tracemarket/types (coming soon)
+- **npm**: https://www.npmjs.com/package/@trace.market/types (coming soon)
 
 ## License
 
