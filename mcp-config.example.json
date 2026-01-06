@@ -3,7 +3,7 @@
     "tm-types": {
       "command": "node",
       "args": [
-        "/Users/mac-pro/dev_projects/trace market/tm-types/mcp-server/dist/index.js"
+        "/tm-types/mcp-server/dist/index.js"
       ],
       "env": {
         "JWT_SECRET": "change-this-to-your-secret-key"
