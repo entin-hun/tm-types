@@ -91,7 +91,7 @@ export interface FreezeDryingProcess extends GenericProcess {
   machineInstance?: MachineInstance;
 }
 
-export interface it BlendingProcess extends GenericProcess {
+export interface BlendingProcess extends GenericProcess {
   type: "blending";
   machineInstance?: MachineInstance;
   knowHow?: KnowHow;
