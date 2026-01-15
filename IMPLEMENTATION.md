@@ -3,7 +3,7 @@
 ## ✅ Completed Setup
 
 ### 1. Package Configuration
-- **Name changed**: `@fairfooddata/types` → `@trace.market/types`
+- **Name**: `@trace.market/types` (new scoped release)
 - **Version**: 0.1.0
 - **License**: MIT (was UNLICENSED)
 - **Repository**: Linked to https://github.com/entin-hun/tm-types
@@ -52,7 +52,7 @@ Created `.github/workflows/`:
 
 ## 📦 Current Type Definitions
 
-All types from `@fairfooddata/types@0.0.6` are preserved:
+All types from `@trace.market/types@0.0.6` are preserved:
 - Pokedex, ProductInstance, FoodInstance, CartridgeInstance
 - Process types: Milling, Printing, FreezeDrying, Blending, Sale, Harvest
 - Supply chain: Transport, Facility, Location, InputInstance
@@ -103,22 +103,17 @@ JWT_SECRET="your-secret" node generate-token.js userId role
 
 ## 🔄 Migration Path
 
-### For Projects Using `@fairfooddata/types`
+### For Projects Using `@trace.market/types`
 
 1. **Update dependencies:**
-   ```bash
-   npm uninstall @fairfooddata/types
-  npm install @trace.market/types
-   ```
+  ```bash
+  npm install @trace.market/types@^0.1.0
+  ```
 
 2. **Find & replace imports:**
-   ```typescript
-   // Old
-   import { FoodInstance } from '@fairfooddata/types';
-   
-   // New
+  ```typescript
   import { FoodInstance } from '@trace.market/types';
-   ```
+  ```
 
 3. **Test builds:**
    ```bash

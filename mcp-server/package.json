@@ -8,8 +8,8 @@
     "tm-types-mcp": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
     "start": "node dist/index.js"
   },
   "dependencies": {

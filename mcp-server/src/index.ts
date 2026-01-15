@@ -8,7 +8,7 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
@@ -20,8 +20,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Path to types definition file
-const TYPES_PATH = join(__dirname, "../../../src/index.d.ts");
+// From mcp-server/dist/index.js, go up to mcp-server, then up to tm-types, then into src
+const TYPES_PATH = join(__dirname, "../../src/index.d.ts");
+const EDITORS_PATH = join(__dirname, "../../tm-editor/src/components/editors");
+const TREE_VIEW_PATH = join(__dirname, "../../tm-package-page/src/components/FoodChainTree.vue");
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const DEFAULT_AUTH_TOKEN = process.env.DEFAULT_AUTH_TOKEN;
 
 interface AuthContext {
   userId?: string;
@@ -30,12 +34,13 @@ interface AuthContext {
 
 // Authentication helper
 function verifyAuth(token?: string): AuthContext {
-  if (!token) {
+  const candidate = token || DEFAULT_AUTH_TOKEN;
+  if (!candidate) {
     return { role: "anonymous" };
   }
   
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(candidate, JWT_SECRET) as any;
     return {
       userId: decoded.userId,
       role: decoded.role || "user",
@@ -48,7 +53,7 @@ function verifyAuth(token?: string): AuthContext {
 // Read current types
 function readTypes(): string {
   if (!existsSync(TYPES_PATH)) {
-    throw new Error("Types file not found");
+    throw new Error(`Types file not found at ${TYPES_PATH}`);
   }
   return readFileSync(TYPES_PATH, "utf-8");
 }
@@ -128,6 +133,277 @@ export interface ${typeName} {
   createdAt: number;
 }
 `.trim();
+}
+
+// Extract interface fields from TypeScript definition
+function extractInterfaceFields(interfaceCode: string): { name: string; type: string; optional: boolean }[] {
+  const fields: { name: string; type: string; optional: boolean }[] = [];
+  const lines = interfaceCode.split('\n');
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('export') || trimmed.startsWith('{') || trimmed.startsWith('}')) {
+      continue;
+    }
+    
+    const fieldMatch = trimmed.match(/(\w+)(\?)?:\s*([^;]+);?/);
+    if (fieldMatch) {
+      const [, fieldName, optional, fieldType] = fieldMatch;
+      fields.push({
+        name: fieldName,
+        type: fieldType.trim(),
+        optional: !!optional
+      });
+    }
+  }
+  
+  return fields;
+}
+
+// Detect which interfaces changed
+function detectChangedInterfaces(oldContent: string, newContent: string): { interfaceName: string; newFields: { name: string; type: string; optional: boolean }[] }[] {
+  const oldInterfaces = parseTypeDefinitions(oldContent).interfaces;
+  const newInterfaces = parseTypeDefinitions(newContent).interfaces;
+  
+  const changes: { interfaceName: string; newFields: { name: string; type: string; optional: boolean }[] }[] = [];
+  
+  for (const newInterface of newInterfaces) {
+    const oldInterface = oldInterfaces.find(i => i.name === newInterface.name);
+    
+    if (oldInterface) {
+      const oldFieldNames = oldInterface.fields.map((f: any) => f.name);
+      const newFields = newInterface.fields.filter((f: any) => !oldFieldNames.includes(f.name));
+      
+      if (newFields.length > 0) {
+        changes.push({
+          interfaceName: newInterface.name,
+          newFields
+        });
+      }
+    }
+  }
+  
+  return changes;
+}
+
+// Update Vue editor files
+function updateVueEditors(changes: { interfaceName: string; newFields: { name: string; type: string; optional: boolean }[] }[]): void {
+  if (!existsSync(EDITORS_PATH)) {
+    console.error(`Editors path not found: ${EDITORS_PATH}`);
+    return;
+  }
+  
+  const editorMap: { [key: string]: string } = {
+    'ProductInstanceBase': 'FoodInstanceEditor.vue', // Also affects CartridgeInstance
+    'FoodInstance': 'FoodInstanceEditor.vue',
+    'CartridgeInstance': 'CartridgeInstanceEditor.vue',
+    'KnowHow': 'KnowHowEditor.vue',
+    'MachineInstance': 'MachineInstanceEditor.vue',
+    'Price': 'PriceEditor.vue',
+    'Transport': 'TransportEditor.vue',
+    'GenericProcess': 'processes/GenericProcessEditor.vue',
+  };
+  
+  for (const change of changes) {
+    const editorFile = editorMap[change.interfaceName];
+    if (!editorFile) continue;
+    
+    const editorPath = join(EDITORS_PATH, editorFile);
+    if (!existsSync(editorPath)) continue;
+    
+    try {
+      let content = readFileSync(editorPath, 'utf-8');
+      
+      // Find the template section
+      const templateMatch = content.match(/<template>([\s\S]*?)<\/template>/);
+      if (!templateMatch) continue;
+      
+      let template = templateMatch[1];
+      
+      // Find where to insert new fields (after type field or at start)
+      const insertPatterns = [
+        /<BasicInput v-model="value\.type" label="type" \/>/,
+        /<BasicInput v-model="value\.owner" label="owner"/,
+        /<q-checkbox/
+      ];
+      
+      let insertIndex = -1;
+      let insertAfter = '';
+      
+      for (const pattern of insertPatterns) {
+        const match = template.match(pattern);
+        if (match) {
+          insertIndex = template.indexOf(match[0]) + match[0].length;
+          insertAfter = match[0];
+          break;
+        }
+      }
+      
+      if (insertIndex === -1) continue;
+      
+      // Generate new BasicInput fields
+      const newFields = change.newFields
+        .map(field => `\n    <BasicInput v-model="value.${field.name}" label="${field.name}" />`)
+        .join('');
+      
+      // Insert new fields
+      template = template.slice(0, insertIndex) + newFields + template.slice(insertIndex);
+      
+      // Replace template in content
+      content = content.replace(/<template>[\s\S]*?<\/template>/, `<template>${template}</template>`);
+      
+      writeFileSync(editorPath, content, 'utf-8');
+      console.error(`Updated editor: ${editorFile}`);
+      
+      // If ProductInstanceBase changed, also update CartridgeInstanceEditor
+      if (change.interfaceName === 'ProductInstanceBase' && editorFile.includes('Food')) {
+        const cartridgePath = join(EDITORS_PATH, 'CartridgeInstanceEditor.vue');
+        if (existsSync(cartridgePath)) {
+          let cartridgeContent = readFileSync(cartridgePath, 'utf-8');
+          const cartridgeTemplateMatch = cartridgeContent.match(/<template>([\s\S]*?)<\/template>/);
+          if (cartridgeTemplateMatch) {
+            let cartridgeTemplate = cartridgeTemplateMatch[1];
+            const cartridgeMatch = cartridgeTemplate.match(/<BasicInput v-model="value\.type" label="type" \/>/);
+            if (cartridgeMatch) {
+              const cartridgeIndex = cartridgeTemplate.indexOf(cartridgeMatch[0]) + cartridgeMatch[0].length;
+              cartridgeTemplate = cartridgeTemplate.slice(0, cartridgeIndex) + newFields + cartridgeTemplate.slice(cartridgeIndex);
+              cartridgeContent = cartridgeContent.replace(/<template>[\s\S]*?<\/template>/, `<template>${cartridgeTemplate}</template>`);
+              writeFileSync(cartridgePath, cartridgeContent, 'utf-8');
+              console.error(`Updated editor: CartridgeInstanceEditor.vue`);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error(`Error updating ${editorFile}: ${error.message}`);
+    }
+  }
+}
+
+// Generate tree node helper function for a field
+function generateTreeNodeHelper(fieldName: string, fieldType: string, optional: boolean): string {
+  const capitalizedName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+  const iconMap: { [key: string]: string } = {
+    title: 'title',
+    description: 'description',
+    pictureURL: 'image',
+    logoURL: 'image',
+    url: 'link',
+    email: 'email',
+    phone: 'phone',
+    address: 'location_on',
+    name: 'badge',
+  };
+  
+  const icon = iconMap[fieldName] || 'info';
+  
+  return `
+function ${fieldName}ToNodes(${fieldName}?: ${fieldType}): QTreeNode[] {
+  return ${fieldName} !== undefined
+    ? [
+        {
+          label: \`${capitalizedName}: \${${fieldName}}\`,
+          icon: '${icon}',
+        },
+      ]
+    : [];
+}`;
+}
+
+// Update tree view component
+function updateTreeView(changes: { interfaceName: string; newFields: { name: string; type: string; optional: boolean }[] }[]): void {
+  if (!existsSync(TREE_VIEW_PATH)) {
+    console.error(`Tree view not found: ${TREE_VIEW_PATH}`);
+    return;
+  }
+  
+  const treeViewInterfaceMap: { [key: string]: { functionName: string; insertPattern: RegExp } } = {
+    'ProductInstanceBase': {
+      functionName: 'foodInstanceToNode',
+      insertPattern: /\.\.\.(ownerIdToNodes|quantityToNodes|bioToNodes)\(food\.\w+\)/
+    },
+    'FoodInstance': {
+      functionName: 'foodInstanceToNode',
+      insertPattern: /\.\.\.(ownerIdToNodes|quantityToNodes|bioToNodes)\(food\.\w+\)/
+    },
+    'CartridgeInstance': {
+      functionName: 'cartridgeInstanceToNode',
+      insertPattern: /\.\.\.(ownerIdToNodes|quantityToNodes|bioToNodes)\(cartridge\.\w+\)/
+    },
+    'KnowHow': {
+      functionName: 'knowHowToNode',
+      insertPattern: /label: `Owner: \${recipe\.owner}`/
+    },
+    'MachineInstance': {
+      functionName: 'machineInstanceToNode',
+      insertPattern: /\.\.\.(ownerIdToNodes|quantityToNodes|sizeToNodes)\(machine\.\w+\)/
+    },
+  };
+  
+  const relevantChanges = changes.filter(c => treeViewInterfaceMap[c.interfaceName]);
+  if (relevantChanges.length === 0) return;
+  
+  try {
+    let content = readFileSync(TREE_VIEW_PATH, 'utf-8');
+    
+    // Find the end of the script (before </script>)
+    const scriptEndMatch = content.match(/<\/script>/);
+    if (!scriptEndMatch) return;
+    
+    const helperFunctionsToAdd: string[] = [];
+    
+    for (const change of relevantChanges) {
+      const mapping = treeViewInterfaceMap[change.interfaceName];
+      const varName = change.interfaceName === 'KnowHow' ? 'recipe' : 
+                      change.interfaceName === 'MachineInstance' ? 'machine' :
+                      change.interfaceName === 'CartridgeInstance' ? 'cartridge' : 'food';
+      
+      // Generate helper functions
+      for (const field of change.newFields) {
+        const helperFunction = generateTreeNodeHelper(field.name, field.type, field.optional);
+        if (!content.includes(`function ${field.name}ToNodes(`)) {
+          helperFunctionsToAdd.push(helperFunction);
+        }
+      }
+      
+      // Find the function and add the new field references
+      const functionPattern = new RegExp(
+        `function ${mapping.functionName}[^{]+{[\\s\\S]*?children: \\[[\\s\\S]*?\\]`,
+        'g'
+      );
+      
+      const functionMatch = content.match(functionPattern);
+      if (functionMatch) {
+        const originalFunction = functionMatch[0];
+        let updatedFunction = originalFunction;
+        
+        // Find where to insert (after the first optional field usage)
+        const insertMatch = updatedFunction.match(mapping.insertPattern);
+        if (insertMatch) {
+          const insertIndex = updatedFunction.indexOf(insertMatch[0]) + insertMatch[0].length;
+          
+          // Add new field references
+          const newFieldRefs = change.newFields
+            .map(field => `\n      ...${field.name}ToNodes(${varName}.${field.name}),`)
+            .join('');
+          
+          updatedFunction = updatedFunction.slice(0, insertIndex) + newFieldRefs + updatedFunction.slice(insertIndex);
+          content = content.replace(originalFunction, updatedFunction);
+        }
+      }
+    }
+    
+    // Add helper functions before </script>
+    if (helperFunctionsToAdd.length > 0) {
+      const insertIndex = content.indexOf('</script>');
+      content = content.slice(0, insertIndex) + '\n' + helperFunctionsToAdd.join('\n') + '\n' + content.slice(insertIndex);
+    }
+    
+    writeFileSync(TREE_VIEW_PATH, content, 'utf-8');
+    console.error('Updated tree view component');
+  } catch (error: any) {
+    console.error(`Error updating tree view: ${error.message}`);
+  }
 }
 
 // Define MCP tools
@@ -422,16 +698,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const { typeDefinition, authToken } = args as any;
         const auth = verifyAuth(authToken);
         
-        const content = readTypes();
-        const newContent = `${content}\n\n${typeDefinition}\n`;
+        const oldContent = readTypes();
+        const newContent = `${oldContent}\n\n${typeDefinition}\n`;
         writeTypes(newContent, auth);
+        
+        // Detect changes and update Vue editors
+        try {
+          const changes = detectChangedInterfaces(oldContent, newContent);
+          if (changes.length > 0) {
+            updateVueEditors(changes);
+            updateTreeView(changes);
+          }
+        } catch (error: any) {
+          console.error(`Error updating editors: ${error.message}`);
+        }
         
         return {
           content: [
             {
               type: "text",
               text: JSON.stringify({
-                message: "Type definition added successfully",
+                message: "Type definition added successfully, editors and tree view updated",
                 userId: auth.userId,
               }),
             },

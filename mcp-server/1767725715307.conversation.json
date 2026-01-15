@@ -1,0 +1,3337 @@
+{
+  "name": "Type Creation Request",
+  "pinned": false,
+  "createdAt": 1767725715308,
+  "preset": "",
+  "tokenCount": 1264,
+  "userLastMessagedAt": 1767725736184,
+  "assistantLastMessagedAt": 1767727089145,
+  "systemPrompt": "",
+  "messages": [
+    {
+      "versions": [
+        {
+          "type": "singleStep",
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"tool\": \"create_type_from_description\",\n  \"arguments\": {\n    \"description\": \"Add these fields to the top-level product instance: title, description, pictureURL. Add logoURL to KnowHow. Each is a string and optional.\"\n  }\n}"
+            }
+          ],
+          "edited": true
+        }
+      ],
+      "currentlySelected": 0
+    },
+    {
+      "versions": [
+        {
+          "type": "multiStep",
+          "role": "assistant",
+          "senderInfo": {
+            "senderName": "qwen/qwen2.5-coder-14b"
+          },
+          "steps": [
+            {
+              "type": "toolStatus",
+              "stepIdentifier": "1767725756655-0.7180101638002744",
+              "callId": 580656761130009,
+              "statusState": {
+                "status": {
+                  "type": "toolCallSucceeded",
+                  "timeMs": 12
+                },
+                "customStatus": "",
+                "customWarnings": []
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767725763571-0.798313550511722",
+              "content": [
+                {
+                  "type": "toolCallRequest",
+                  "callId": 580656761130009,
+                  "toolCallRequestId": "439977227",
+                  "name": "create_type_from_description",
+                  "parameters": {
+                    "description": "Add these fields to the top-level product instance: title, description, pictureURL. Add logoURL to KnowHow. Each is a string and optional.",
+                    "authToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJic3lzZGV2Iiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzY3NzI1NTYxLCJleHAiOjE3ODMyNzc1NjF9.vwsn_zg0c7pZpxj3TAMd8IUWFe5f7DUgxlk7K5mmbDU"
+                  },
+                  "pluginIdentifier": "mcp/tm-types"
+                }
+              ],
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 26.33969625248665,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 19.575,
+                  "totalTimeSec": 7.479,
+                  "promptTokensCount": 1351,
+                  "predictedTokensCount": 197,
+                  "totalTokensCount": 1548
+                }
+              },
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767725763586-0.5316140593606871",
+              "content": [
+                {
+                  "type": "toolCallResult",
+                  "callId": 580656761130009,
+                  "toolCallRequestId": "439977227",
+                  "content": "[{\"type\":\"text\",\"text\":\"{\\\"error\\\":\\\"Types file not found\\\"}\"}]",
+                  "name": "create_type_from_description"
+                }
+              ],
+              "roleOverride": "tool",
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767725765083-0.10721282625300077",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "It seems there was an issue creating the type definition. Please ensure that the necessary types file is available and try again. If you continue to experience issues, please contact support for assistance.",
+                  "fromDraftModel": false,
+                  "tokensCount": 37,
+                  "isStructural": false
+                }
+              ],
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.253569102486992,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 1.3,
+                  "totalTimeSec": 1.394,
+                  "promptTokensCount": 1572,
+                  "predictedTokensCount": 38,
+                  "totalTokensCount": 1610
+                }
+              },
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "debugInfoBlock",
+              "stepIdentifier": "1767725766329-0.9192960822022237",
+              "debugInfo": "Conversation naming technique: 'prompt'"
+            }
+          ]
+        },
+        {
+          "type": "multiStep",
+          "role": "assistant",
+          "senderInfo": {
+            "senderName": "qwen/qwen2.5-coder-14b"
+          },
+          "steps": [
+            {
+              "type": "toolStatus",
+              "stepIdentifier": "1767726976218-0.7155186548208279",
+              "callId": 580656761130010,
+              "statusState": {
+                "status": {
+                  "type": "toolCallSucceeded",
+                  "timeMs": 16
+                },
+                "customStatus": "",
+                "customWarnings": []
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767726982871-0.5155332146068804",
+              "content": [
+                {
+                  "type": "toolCallRequest",
+                  "callId": 580656761130010,
+                  "toolCallRequestId": "298783889",
+                  "name": "create_type_from_description",
+                  "parameters": {
+                    "description": "Add these fields to the top-level product instance: title, description, pictureURL. Add logoURL to KnowHow. Each is a string and optional.",
+                    "authToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJic3lzZGV2Iiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzY3NzI1NTYxLCJleHAiOjE3ODMyNzc1NjF9.vwsn_zg0c7pZpxj3TAMd8IUWFe5f7DUgxlk7K5mmbDU"
+                  },
+                  "pluginIdentifier": "mcp/tm-types"
+                }
+              ],
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 26.169988740695036,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 28.253,
+                  "totalTimeSec": 7.179,
+                  "promptTokensCount": 1351,
+                  "predictedTokensCount": 188,
+                  "totalTokensCount": 1539
+                }
+              },
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767726982888-0.5053809535265276",
+              "content": [
+                {
+                  "type": "toolCallResult",
+                  "callId": 580656761130010,
+                  "toolCallRequestId": "298783889",
+                  "content": "[{\"type\":\"text\",\"text\":\"{\\\"error\\\":\\\"Authentication required\\\"}\"}]",
+                  "name": "create_type_from_description"
+                }
+              ],
+              "roleOverride": "tool",
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767726984383-0.9507400924247519",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "It looks like there was an authentication error. Please ensure that the provided `authToken` is valid and has the necessary permissions to create a new type definition.",
+                  "fromDraftModel": false,
+                  "tokensCount": 32,
+                  "isStructural": false
+                }
+              ],
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.495252280225223,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 1.294,
+                  "totalTimeSec": 1.2,
+                  "promptTokensCount": 1570,
+                  "predictedTokensCount": 33,
+                  "totalTokensCount": 1603
+                }
+              },
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "debugInfoBlock",
+              "stepIdentifier": "1767726985436-0.8020004924852115",
+              "debugInfo": "Conversation naming technique: 'prompt'"
+            }
+          ]
+        },
+        {
+          "type": "multiStep",
+          "role": "assistant",
+          "steps": [
+            {
+              "type": "toolStatus",
+              "stepIdentifier": "1767727006517-0.514055645504167",
+              "callId": 580656761130011,
+              "statusState": {
+                "status": {
+                  "type": "toolCallSucceeded",
+                  "timeMs": 9
+                },
+                "customStatus": "",
+                "customWarnings": []
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727008518-0.6524866112301323",
+              "content": [
+                {
+                  "type": "toolCallRequest",
+                  "callId": 580656761130011,
+                  "toolCallRequestId": "369711234",
+                  "name": "create_type_from_description",
+                  "parameters": {
+                    "description": "Add these fields to the top-level product instance: title, description, pictureURL. Add logoURL to KnowHow. Each is a string and optional.",
+                    "authToken": "<your_auth_token>"
+                  },
+                  "pluginIdentifier": "mcp/tm-types"
+                }
+              ],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 26.70247809304645,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 1.598,
+                  "totalTimeSec": 2.547,
+                  "promptTokensCount": 1220,
+                  "predictedTokensCount": 68,
+                  "totalTokensCount": 1288
+                }
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727008528-0.30781250184489994",
+              "content": [
+                {
+                  "type": "toolCallResult",
+                  "callId": 580656761130011,
+                  "toolCallRequestId": "369711234",
+                  "name": "create_type_from_description",
+                  "content": "[{\"type\":\"text\",\"text\":\"{\\\"error\\\":\\\"Authentication required\\\"}\"}]"
+                }
+              ],
+              "roleOverride": "tool",
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727009376-0.5068243036418504",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "It looks like the tool call requires an authentication token. Please provide a valid JWT authentication token to proceed with creating the type from the description.",
+                  "fromDraftModel": false,
+                  "tokensCount": 28,
+                  "isStructural": false
+                }
+              ],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.618183985282883,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 0.654,
+                  "totalTimeSec": 1.05,
+                  "promptTokensCount": 1320,
+                  "predictedTokensCount": 29,
+                  "totalTokensCount": 1349
+                }
+              }
+            },
+            {
+              "type": "debugInfoBlock",
+              "stepIdentifier": "1767727010278-0.1146113658992094",
+              "debugInfo": "Conversation naming technique: 'prompt'"
+            }
+          ],
+          "senderInfo": {
+            "senderName": "qwen/qwen2.5-coder-14b"
+          }
+        },
+        {
+          "type": "multiStep",
+          "role": "assistant",
+          "steps": [
+            {
+              "type": "toolStatus",
+              "stepIdentifier": "1767727033486-0.5542324768094444",
+              "callId": 580656761130012,
+              "statusState": {
+                "status": {
+                  "type": "toolCallSucceeded",
+                  "timeMs": 4
+                },
+                "customStatus": "",
+                "customWarnings": []
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727035479-0.8787461553483956",
+              "content": [
+                {
+                  "type": "toolCallRequest",
+                  "callId": 580656761130012,
+                  "toolCallRequestId": "473718731",
+                  "name": "create_type_from_description",
+                  "parameters": {
+                    "description": "Add these fields to the top-level product instance: title, description, pictureURL. Add logoURL to KnowHow. Each is a string and optional.",
+                    "authToken": "<your_auth_token>"
+                  },
+                  "pluginIdentifier": "mcp/tm-types"
+                }
+              ],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.05057936224778,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 1.277,
+                  "totalTimeSec": 2.514,
+                  "promptTokensCount": 1220,
+                  "predictedTokensCount": 68,
+                  "totalTokensCount": 1288
+                }
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727035484-0.8754493654904135",
+              "content": [
+                {
+                  "type": "toolCallResult",
+                  "callId": 580656761130012,
+                  "toolCallRequestId": "473718731",
+                  "name": "create_type_from_description",
+                  "content": "[{\"type\":\"text\",\"text\":\"{\\\"error\\\":\\\"Authentication required\\\"}\"}]"
+                }
+              ],
+              "roleOverride": "tool",
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727036286-0.6368618774605473",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "It seems that authentication is required to create a new type definition. Please provide a valid JWT authentication token in the arguments object when calling the `create_type_from_description` function.",
+                  "fromDraftModel": false,
+                  "tokensCount": 35,
+                  "isStructural": false
+                }
+              ],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.670319536742404,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 0.646,
+                  "totalTimeSec": 1.301,
+                  "promptTokensCount": 1320,
+                  "predictedTokensCount": 36,
+                  "totalTokensCount": 1356
+                }
+              }
+            },
+            {
+              "type": "debugInfoBlock",
+              "stepIdentifier": "1767727037478-0.4072548352813332",
+              "debugInfo": "Conversation naming technique: 'prompt'"
+            }
+          ],
+          "senderInfo": {
+            "senderName": "qwen/qwen2.5-coder-14b"
+          }
+        },
+        {
+          "type": "multiStep",
+          "role": "assistant",
+          "steps": [
+            {
+              "type": "toolStatus",
+              "stepIdentifier": "1767727061124-0.16139471093949276",
+              "callId": 580656761130013,
+              "statusState": {
+                "status": {
+                  "type": "toolCallSucceeded",
+                  "timeMs": 4
+                },
+                "customStatus": "",
+                "customWarnings": []
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727063116-0.5266277269622175",
+              "content": [
+                {
+                  "type": "toolCallRequest",
+                  "callId": 580656761130013,
+                  "toolCallRequestId": "324068321",
+                  "name": "create_type_from_description",
+                  "parameters": {
+                    "description": "Add these fields to the top-level product instance: title, description, pictureURL. Add logoURL to KnowHow. Each is a string and optional.",
+                    "authToken": "your_auth_token_here"
+                  },
+                  "pluginIdentifier": "mcp/tm-types"
+                }
+              ],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.011320974518984,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 1.212,
+                  "totalTimeSec": 2.518,
+                  "promptTokensCount": 1220,
+                  "predictedTokensCount": 68,
+                  "totalTokensCount": 1288
+                }
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727063122-0.3489589648474034",
+              "content": [
+                {
+                  "type": "toolCallResult",
+                  "callId": 580656761130013,
+                  "toolCallRequestId": "324068321",
+                  "name": "create_type_from_description",
+                  "content": "[{\"type\":\"text\",\"text\":\"{\\\"error\\\":\\\"Authentication required\\\"}\"}]"
+                }
+              ],
+              "roleOverride": "tool",
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727063953-0.025926929503886642",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "It seems like the operation requires authentication. Please provide a valid JWT authentication token to proceed.",
+                  "fromDraftModel": false,
+                  "tokensCount": 18,
+                  "isStructural": false
+                }
+              ],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 28.65026164044712,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 0.643,
+                  "totalTimeSec": 0.664,
+                  "promptTokensCount": 1319,
+                  "predictedTokensCount": 19,
+                  "totalTokensCount": 1338
+                }
+              }
+            },
+            {
+              "type": "debugInfoBlock",
+              "stepIdentifier": "1767727064472-0.31235004216518913",
+              "debugInfo": "Conversation naming technique: 'prompt'"
+            }
+          ],
+          "senderInfo": {
+            "senderName": "qwen/qwen2.5-coder-14b"
+          }
+        },
+        {
+          "type": "multiStep",
+          "role": "assistant",
+          "steps": [
+            {
+              "type": "toolStatus",
+              "stepIdentifier": "1767727085180-0.5545042362741905",
+              "callId": 580656761130014,
+              "statusState": {
+                "status": {
+                  "type": "toolCallGenerationFailed",
+                  "error": "Failed to parse arguments for tool \"create_type_from_description\": params requires property \"authToken\"",
+                  "rawContent": "{\"name\": \"create_type_from_description\", \"arguments\": {\"description\": \"Add these fields to the top-level product instance: title, description, pictureURL. Add logoURL to KnowHow. Each is a string and optional.\"}}"
+                },
+                "customStatus": "",
+                "customWarnings": []
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727086820-0.14342624037049",
+              "content": [],
+              "roleOverride": "tool",
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true
+            },
+            {
+              "type": "debugInfoBlock",
+              "stepIdentifier": "1767727086820-0.774600438322595",
+              "debugInfo": "Tool call 580656761130014 not found"
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727086854-0.7973249176987934",
+              "content": [],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.42498559085447,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 1.245,
+                  "totalTimeSec": 2.151,
+                  "promptTokensCount": 1220,
+                  "predictedTokensCount": 59,
+                  "totalTokensCount": 1279
+                }
+              }
+            },
+            {
+              "type": "contentBlock",
+              "stepIdentifier": "1767727087689-0.4899770576711081",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "It seems that the `create_type_from_description` tool requires an authentication token. Please provide a valid JWT authentication token to proceed.\n\nIf you do not have an authentication token, please contact the system administrator to obtain one.",
+                  "fromDraftModel": false,
+                  "tokensCount": 44,
+                  "isStructural": false
+                }
+              ],
+              "defaultShouldIncludeInContext": true,
+              "shouldIncludeInContext": true,
+              "genInfo": {
+                "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+                "identifier": "qwen/qwen2.5-coder-14b",
+                "loadModelConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.load.contextLength",
+                      "value": 32768
+                    }
+                  ]
+                },
+                "predictionConfig": {
+                  "fields": [
+                    {
+                      "key": "llm.prediction.promptTemplate",
+                      "value": {
+                        "type": "jinja",
+                        "jinjaPromptTemplate": {
+                          "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n"
+                        },
+                        "stopStrings": []
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.minPSampling",
+                      "value": {
+                        "checked": false,
+                        "value": 0
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.repeatPenalty",
+                      "value": {
+                        "checked": true,
+                        "value": 1.1
+                      }
+                    },
+                    {
+                      "key": "llm.prediction.topKSampling",
+                      "value": 100
+                    },
+                    {
+                      "key": "llm.prediction.contextPrefill",
+                      "value": []
+                    },
+                    {
+                      "key": "llm.prediction.tools",
+                      "value": {
+                        "type": "toolArray",
+                        "tools": [
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "list_types",
+                              "description": "List all available type definitions (interfaces and types). No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "filter": {
+                                    "type": "string",
+                                    "description": "Optional filter to search type names"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "get_type_definition",
+                              "description": "Get detailed definition of a specific type. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to retrieve"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "validate_data",
+                              "description": "Validate data against a type definition. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Name of the type to validate against"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data object to validate"
+                                  }
+                                },
+                                "required": [
+                                  "typeName",
+                                  "data"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "create_type_from_description",
+                              "description": "Create a new type definition from a natural language description. Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "description": {
+                                    "type": "string",
+                                    "description": "Natural language description of the type to create"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "description",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "add_type_definition",
+                              "description": "Add a new type definition (TypeScript code). Requires authentication (admin or user role).",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeDefinition": {
+                                    "type": "string",
+                                    "description": "TypeScript type definition to add"
+                                  },
+                                  "authToken": {
+                                    "type": "string",
+                                    "description": "JWT authentication token"
+                                  }
+                                },
+                                "required": [
+                                  "typeDefinition",
+                                  "authToken"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "query_data",
+                              "description": "Query and filter data based on type structure. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "typeName": {
+                                    "type": "string",
+                                    "description": "Type to query"
+                                  },
+                                  "query": {
+                                    "type": "object",
+                                    "description": "Query filters (field: value pairs)"
+                                  }
+                                },
+                                "required": [
+                                  "typeName"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "function",
+                            "function": {
+                              "name": "generate_report",
+                              "description": "Generate a custom report from type data. No authentication required.",
+                              "parameters": {
+                                "type": "object",
+                                "properties": {
+                                  "reportType": {
+                                    "type": "string",
+                                    "description": "Type of report to generate (e.g., 'summary', 'detailed', 'impact')"
+                                  },
+                                  "data": {
+                                    "type": "object",
+                                    "description": "Data to include in report"
+                                  },
+                                  "format": {
+                                    "type": "string",
+                                    "enum": [
+                                      "json",
+                                      "markdown",
+                                      "html"
+                                    ],
+                                    "description": "Output format"
+                                  }
+                                },
+                                "required": [
+                                  "reportType",
+                                  "data"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "stats": {
+                  "stopReason": "eosFound",
+                  "tokensPerSecond": 27.50832356023727,
+                  "numGpuLayers": -1,
+                  "timeToFirstTokenSec": 0.641,
+                  "totalTimeSec": 1.636,
+                  "promptTokensCount": 1316,
+                  "predictedTokensCount": 45,
+                  "totalTokensCount": 1361
+                }
+              }
+            },
+            {
+              "type": "debugInfoBlock",
+              "stepIdentifier": "1767727089143-0.9588797409289967",
+              "debugInfo": "Conversation naming technique: 'prompt'"
+            }
+          ],
+          "senderInfo": {
+            "senderName": "qwen/qwen2.5-coder-14b"
+          }
+        }
+      ],
+      "currentlySelected": 5
+    }
+  ],
+  "usePerChatPredictionConfig": true,
+  "perChatPredictionConfig": {
+    "fields": []
+  },
+  "clientInput": "",
+  "clientInputFiles": [],
+  "userFilesSizeBytes": 0,
+  "lastUsedModel": {
+    "identifier": "qwen/qwen2.5-coder-14b",
+    "indexedModelIdentifier": "qwen/qwen2.5-coder-14b",
+    "instanceLoadTimeConfig": {
+      "fields": []
+    },
+    "instanceOperationTimeConfig": {
+      "fields": []
+    }
+  },
+  "notes": [],
+  "plugins": [
+    "mcp/tm-types"
+  ],
+  "pluginConfigs": {},
+  "disabledPluginTools": [],
+  "looseFiles": []
+}

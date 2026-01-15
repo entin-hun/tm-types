@@ -44,6 +44,8 @@ const token = jwt.sign(
 );
 ```
 
+To avoid pasting the token on every call in local/dev, you can set `DEFAULT_AUTH_TOKEN` in the MCP server environment; when a tool call omits `authToken`, the server will fall back to this value. Keep this disabled in shared or production environments.
+
 ## MCP Tools
 
 ### `list_types`

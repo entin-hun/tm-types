@@ -129,13 +129,11 @@ Generate a summary report for this product data:
 ### Publishing Process
 
 The CI/CD is configured to automatically publish when:
-To switch from `@fairfooddata/types` to `@trace.market/types`:
 1. You push to main branch
 2. The version in package.json has changed
 3. TypeScript validation passes
 
 **To publish a new version:**
-npm install @trace.market/types
 ```bash
 # 1. Update version
 npm version patch  # or minor, or major
@@ -145,7 +143,6 @@ git push origin main
 
 # 3. GitHub Actions will automatically:
 #    - Validate types
-import { FoodInstance } from '@trace.market/types';
 #    - Create git tag
 #    - Create GitHub release
 ```
@@ -159,25 +156,19 @@ import { FoodInstance } from '@trace.market/types';
 ### 1. Update package.json
 
 ```bash
-npm uninstall @fairfooddata/types
 npm install @trace.market/types
 ```
 
 ### 2. Update Imports
 
 ```typescript
-// Old
-import { FoodInstance } from '@fairfooddata/types';
-
-// New  
 import { FoodInstance } from '@trace.market/types';
 ```
 
 ### 3. Run Find & Replace
 
 In VS Code:
-- Find: `@fairfooddata/types`
-- Replace: `@trace.market/types`
+- Verify all imports reference `@trace.market/types`
 - Replace in all files across workspace
 
 ## Adding New Types

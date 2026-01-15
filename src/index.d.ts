@@ -1,4 +1,37 @@
 import { GeoJSON } from "geojson";
+export { 
+  typeDescriptions, 
+  getFieldDescription, 
+  getTypeDescription,
+  getAllTypeNames,
+  getProcessIcon,
+  getProcessLabel,
+  hasTypeDescription
+} from "./descriptions";
+export type { FieldDescription, TypeDescription } from "./descriptions";
+
+// OpenLCA MCP Enricher types
+export type {
+  ImpactResult,
+  NormalisedImpact,
+  LCIAResult,
+  ProcessMatched,
+  RequestMatched,
+  EstimateSuccess,
+  ProcessMatchCandidate,
+  EstimateClarification,
+  EstimateError,
+  EstimateResponse,
+  EstimateImpactRequest,
+  DatabaseInfo,
+  LCIAMethodInfo,
+  DatabasesListResponse,
+  LCIAMethodsListResponse,
+  ProcessSearchRequest,
+  ProcessSearchResult,
+  EnricherConfig
+} from "./openlcaMcpTypes";
+export { traceMarketToEstimate, extractKeyImpacts } from "./openlcaMcpTypes";
 
 export type TokenIdOr<T> = string | T | FetchError;
 
@@ -32,8 +65,8 @@ export type Process =
 export interface GenericProcess {
   timestamp: number;
   duration?: number;
-  facility: Facility;
-  temperatureRange: TemperatureRange;
+  facility?: Facility;
+  temperatureRange?: TemperatureRange;
   inputInstances: (TransportedInputInstance | LocalInputInstance)[];
   impacts?: Impact[];
   price?: Price;
@@ -41,27 +74,27 @@ export interface GenericProcess {
 
 export interface PrintingProcess extends GenericProcess {
   type: "printing";
-  machineInstance: MachineInstance;
-  knowHow: KnowHow;
+  machineInstance?: MachineInstance;
+  knowHow?: KnowHow;
   shape: string /* URL */;
 }
 
 export interface MillingProcess extends GenericProcess {
   type: "milling";
-  knowHow: KnowHow;
-  machineInstance: MachineInstance;
+  knowHow?: KnowHow;
+  machineInstance?: MachineInstance;
 }
 
 export interface FreezeDryingProcess extends GenericProcess {
   type: "freezedrying";
-  knowHow: KnowHow;
-  machineInstance: MachineInstance;
+  knowHow?: KnowHow;
+  machineInstance?: MachineInstance;
 }
 
-export interface BlendingProcess extends GenericProcess {
+export interface it BlendingProcess extends GenericProcess {
   type: "blending";
-  machineInstance: MachineInstance;
-  knowHow: KnowHow;
+  machineInstance?: MachineInstance;
+  knowHow?: KnowHow;
 }
 
 export interface SaleProcess extends GenericProcess {
@@ -111,6 +144,9 @@ export interface ProductInstanceBase {
   bio: boolean;
   quantity: number;
   price?: Price;
+  title?: string;
+  description?: string;
+  pictureURL?: string;
 }
 
 export interface FoodInstance extends ProductInstanceBase {
@@ -162,6 +198,7 @@ export interface KnowHow {
   outputs: string;
   licenseFee: Price;
   note?: string | object;
+  logoURL?: string;
 }
 
 export interface GenericImpact {
