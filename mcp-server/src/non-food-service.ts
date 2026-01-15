@@ -125,8 +125,12 @@ Keep it simple but realistic.
     try {
         // Check preferred provider first if specified
         if (preferredProvider?.includes('gemini') && keys.geminiKey) {
-            console.error('[decompose] Using Gemini for decomposition (preferred)');
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${keys.geminiKey}`, {
+            const modelName = keys.modelName && keys.modelName.startsWith('gemini') 
+                ? keys.modelName 
+                : 'gemini-1.5-flash';
+            const modelPath = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
+            console.error(`[decompose] Using Gemini model ${modelPath} for decomposition (preferred)`);
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1/${modelPath}:generateContent?key=${keys.geminiKey}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

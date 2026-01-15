@@ -11,6 +11,8 @@ import { z } from "zod";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { EventEmitter } from "events";
+import { randomUUID } from "crypto";
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import express from "express";
@@ -415,12 +417,54 @@ function updateTreeView(changes: { interfaceName: string; newFields: { name: str
 const app = express();
 const HTTP_PORT = process.env.HTTP_PORT || 3456; 
 
+type AgUiMessage = {
+  eventType: string;
+  payload?: any;
+  requestId?: string;
+  ts: number;
+};
+
+const agUiEmitter = new EventEmitter();
+
+function emitAgUi(eventType: string, payload?: any, requestId?: string) {
+  const message: AgUiMessage = { eventType, payload, requestId, ts: Date.now() };
+  agUiEmitter.emit("ag-ui", message);
+}
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-ai-provider']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-ai-provider', 'x-ai-model']
 }));
 app.use(express.json({ limit: '10mb' }));
+
+app.get('/ag-ui/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no'
+  });
+
+  const send = (message: AgUiMessage) => {
+    res.write(`event: ag-ui\n`);
+    res.write(`data: ${JSON.stringify(message)}\n\n`);
+  };
+
+  send({ eventType: 'connected', ts: Date.now() });
+
+  const handler = (message: AgUiMessage) => send(message);
+  agUiEmitter.on('ag-ui', handler);
+
+  const heartbeat = setInterval(() => {
+    send({ eventType: 'heartbeat', ts: Date.now() });
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    agUiEmitter.off('ag-ui', handler);
+  });
+});
 
 app.post('/extract', async (req, res) => {
   try {
@@ -428,12 +472,39 @@ app.post('/extract', async (req, res) => {
       if (!text && (!attachments || attachments.length === 0)) {
           return res.status(400).json({ error: "Text or attachments required" });
       }
+      const requestId = randomUUID();
+      emitAgUi('extract-start', {
+        textPreview: typeof text === 'string' ? text.slice(0, 200) : undefined,
+        attachmentCount: attachments?.length || 0
+      }, requestId);
+
+      const authHeader = req.headers.authorization;
+      const providerHeader = req.headers['x-ai-provider'];
+      const modelHeader = req.headers['x-ai-model'];
       
+      let apiKeys: any = {};
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+           const key = authHeader.split(' ')[1];
+           const provider = (typeof providerHeader === 'string' ? providerHeader.toLowerCase() : 'groq');
+           if (provider.includes('gemini')) apiKeys.geminiKey = key;
+           else if (provider.includes('openrouter')) apiKeys.openRouterKey = key;
+           else apiKeys.groqKey = key;
+      }
+      if (modelHeader && typeof modelHeader === 'string') {
+          apiKeys.modelName = modelHeader;
+      }
+
       console.error(`[HTTP] Extraction requested for ${text?.slice(0, 50)}...`);
-      const result = await runExtraction({ text, attachments });
+      const result = await runExtraction({ text, attachments }, apiKeys);
+      emitAgUi('extract-complete', {
+        ok: true,
+        name: result?.name,
+        category: result?.category
+      }, requestId);
       res.json(result);
   } catch (error: any) {
       console.error('[HTTP] Extraction error:', error);
+      emitAgUi('extract-error', { message: error.message }, undefined);
       res.status(500).json({ error: error.message });
   }
 });
@@ -441,8 +512,14 @@ app.post('/extract', async (req, res) => {
 app.post('/suggest/food', async (req, res) => {
   try {
       console.error(`[HTTP] Food suggestion requested`);
+      const requestId = randomUUID();
+      emitAgUi('suggest-food-start', {
+        query: req.body?.query,
+        category: req.body?.category
+      }, requestId);
       const authHeader = req.headers.authorization;
       const providerHeader = req.headers['x-ai-provider'];
+      const modelHeader = req.headers['x-ai-model'];
       
       let apiKeys: any = {};
       if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -452,11 +529,16 @@ app.post('/suggest/food', async (req, res) => {
            else if (provider.includes('openrouter')) apiKeys.openRouterKey = key;
            else apiKeys.groqKey = key; 
       }
+      if (modelHeader && typeof modelHeader === 'string') {
+          apiKeys.modelName = modelHeader;
+      }
 
       const result = await suggestFood(req.body, apiKeys);
+        emitAgUi('suggest-food-complete', { ok: true }, requestId);
       res.json(result);
   } catch (error: any) {
       console.error('[HTTP] Suggest Food error:', error);
+        emitAgUi('suggest-food-error', { message: error.message }, undefined);
       res.status(500).json({ error: error.message });
   }
 });
@@ -464,10 +546,17 @@ app.post('/suggest/food', async (req, res) => {
 app.post('/suggest/non-food', async (req, res) => {
   try {
       console.error(`[HTTP] Non-food suggestion requested`);
+      const requestId = randomUUID();
+      emitAgUi('suggest-non-food-start', {
+        query: req.body?.query,
+        category: req.body?.category
+      }, requestId);
       const result = await suggestNonFood(req.body);
+      emitAgUi('suggest-non-food-complete', { ok: true }, requestId);
       res.json(result);
   } catch (error: any) {
       console.error('[HTTP] Suggest Non-Food error:', error);
+      emitAgUi('suggest-non-food-error', { message: error.message }, undefined);
       res.status(500).json({ error: error.message });
   }
 });
@@ -475,8 +564,11 @@ app.post('/suggest/non-food', async (req, res) => {
 app.post('/decompose/non-food', async (req, res) => {
   try {
       console.error(`[HTTP] Non-food decomposition requested`);
+  const requestId = randomUUID();
       const authHeader = req.headers.authorization;
       const providerHeader = req.headers['x-ai-provider'];
+      
+      const modelHeader = req.headers['x-ai-model'];
       
       let apiKeys: any = {};
       let provider = 'groq'; // default
@@ -487,11 +579,20 @@ app.post('/decompose/non-food', async (req, res) => {
            else if (provider.includes('openrouter')) apiKeys.openRouterKey = key;
            else apiKeys.groqKey = key; 
       }
-
+      if (modelHeader && typeof modelHeader === 'string') {
+          apiKeys.modelName = modelHeader;
+      }
+      emitAgUi('decompose-non-food-start', {
+        query: req.body?.query,
+        category: req.body?.category,
+        provider
+      }, requestId);
       const result = await decomposeNonFood(req.body, apiKeys, provider);
+      emitAgUi('decompose-non-food-complete', { ok: true }, requestId);
       res.json(result);
   } catch (error: any) {
       console.error('[HTTP] Decompose Non-Food error:', error);
+      emitAgUi('decompose-non-food-error', { message: error.message }, undefined);
       res.status(500).json({ error: error.message });
   }
 });

@@ -5,6 +5,7 @@ export interface AIConfig {
     openRouterKey?: string;
     geminiKey?: string;
     groqKey?: string;
+    modelName?: string;
 }
 
 const CONFIG_PATH = '/opt/lca-chat/data/config.json';
@@ -61,12 +62,16 @@ function normalizeExtractionResult(raw: any) {
     const process = populated.process || {};
 
     const instanceName = instance.name || instance.type || 'Unknown Product';
-    const instanceQty = toGrams(instance.quantity?.value, instance.quantity?.unit);
+    const instanceQty = typeof instance.quantity === 'number'
+        ? toGrams(instance.quantity, instance.quantityUnit)
+        : toGrams(instance.quantity?.value, instance.quantity?.unit);
 
     const inputInstances = Array.isArray(process.inputInstances) ? process.inputInstances : [];
     const normalizedInputs = inputInstances.map((input: any) => {
         const name = input?.name || input?.instance?.type || input?.instance?.name || 'Unknown Input';
-        const grams = toGrams(input?.amount?.value, input?.amount?.unit);
+        const grams = typeof input?.quantity === 'number'
+            ? toGrams(input?.quantity, input?.quantityUnit)
+            : toGrams(input?.amount?.value, input?.amount?.unit);
         return {
             type: 'local',
             quantity: grams,
@@ -79,8 +84,37 @@ function normalizeExtractionResult(raw: any) {
         };
     });
 
+    const normalizedInputsWithWater = (() => {
+        const totalInputs = normalizedInputs.reduce((sum: number, item: { quantity?: number }) => sum + (item.quantity || 0), 0);
+        const remaining = instanceQty > 0 ? Math.max(0, instanceQty - totalInputs) : 0;
+        const text = `${instanceName} ${instance.description || ''}`.toLowerCase();
+        const waterLikely = [
+            'water', 'liquid', 'beverage', 'drink', 'juice', 'tea', 'coffee',
+            'soup', 'broth', 'cleaner', 'detergent', 'soap', 'vinegar',
+            'surface', 'window', 'spray'
+        ].some((k) => text.includes(k));
+
+        if (remaining > 0 && waterLikely) {
+            return [
+                ...normalizedInputs,
+                {
+                    type: 'local',
+                    quantity: remaining,
+                    instance: {
+                        category: 'food',
+                        type: 'Water',
+                        bio: false,
+                        quantity: 0
+                    }
+                }
+            ];
+        }
+
+        return normalizedInputs;
+    })();
+
     return {
-        summary: raw.summary || `Found ${normalizedInputs.length} inputs`,
+        summary: raw.summary || `Found ${normalizedInputsWithWater.length} inputs`,
         populated: {
             instance: {
                 category: 'food',
@@ -92,14 +126,16 @@ function normalizeExtractionResult(raw: any) {
             process: {
                 type: 'blending',
                 timestamp: Date.now(),
-                inputInstances: normalizedInputs
+                inputInstances: normalizedInputsWithWater
             }
         }
     };
 }
 
-export async function runExtraction(req: ExtractionRequest) {
-    const keys = getAIKeys();
+export async function runExtraction(req: ExtractionRequest, transientKeys?: AIConfig) {
+    const keys = transientKeys?.geminiKey || transientKeys?.groqKey || transientKeys?.openRouterKey
+        ? { ...getAIKeys(), ...transientKeys }
+        : getAIKeys();
     
     // Construct Prompt
     const prompt = `
@@ -172,8 +208,12 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
     // Try Gemini
     if (keys.geminiKey) {
         try {
-            console.error('[AI] Using Gemini...');
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${keys.geminiKey}`;
+            const modelName = keys.modelName && keys.modelName.startsWith('gemini') 
+                ? keys.modelName 
+                : 'gemini-1.5-flash';
+            const modelPath = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
+            console.error(`[AI] Using Gemini model: ${modelPath}`);
+            const url = `https://generativelanguage.googleapis.com/v1/${modelPath}:generateContent?key=${keys.geminiKey}`;
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

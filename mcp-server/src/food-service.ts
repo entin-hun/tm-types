@@ -338,6 +338,10 @@ Output JSON only.
     let aiResult = null;
     const extractedIngredients = extractIngredientsFromText(contextText);
     const totalGrams = inferTotalGrams(query, contextText, params.ids, params.quantity);
+    console.log(`[Food] Extracted ${extractedIngredients.length} ingredients from context. Total grams: ${totalGrams}`);
+    if (extractedIngredients.length > 0) {
+        console.log(`[Food] Ingredients:`, extractedIngredients.map(i => `${i.name} (${i.percent ?? 'no %}'})`).join(', '));
+    }
     
     if (keys.groqKey) {
         try {
@@ -376,8 +380,13 @@ Output JSON only.
             }
         } catch(e) {}
     } else if (keys.geminiKey) {
+        const modelName = keys.modelName && keys.modelName.startsWith('gemini') 
+            ? keys.modelName 
+            : 'gemini-1.5-flash';
+        const modelPath = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
+        console.log(`[Food] Using Gemini model ${modelPath} for fallback extraction...`);
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${keys.geminiKey}`, {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1/${modelPath}:generateContent?key=${keys.geminiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -405,10 +414,28 @@ Output JSON only.
             process: { type: 'blending', inputInstances: [] }
         };
     }
+
+    if (aiResult.process?.inputInstances?.length > 0) {
+        const allZero = aiResult.process.inputInstances.every((i: any) => i.quantity === 0 || i.quantity === undefined);
+        console.log(`[Food] AI returned ${aiResult.process.inputInstances.length} inputs (all zero: ${allZero})`);
+    }
+
+    if (totalGrams && (!aiResult.quantity || aiResult.quantity === 0)) {
+        aiResult.quantity = totalGrams;
+    }
     
-    if (aiResult && (!aiResult.process || !Array.isArray(aiResult.process.inputInstances) || aiResult.process.inputInstances.length === 0) && extractedIngredients.length > 0) {
+    const allInputsZero = aiResult?.process?.inputInstances?.length > 0 && aiResult.process.inputInstances.every((i: any) => i.quantity === 0 || i.quantity === undefined);
+    const shouldUseExtracted = extractedIngredients.length > 0 && (!aiResult.process?.inputInstances?.length || allInputsZero);
+    
+    if (shouldUseExtracted) {
+        console.log(`[Food] Will use extracted ingredients (AI had ${aiResult.process?.inputInstances?.length ?? 0} inputs, all zero: ${allInputsZero})`);
         aiResult.process = aiResult.process || { type: 'blending', inputInstances: [] };
-        const knownPercentTotal = extractedIngredients.reduce((s, i) => s + (i.percent || 0), 0);
+        const withPercent = extractedIngredients.filter(i => typeof i.percent === 'number');
+        const withoutPercent = extractedIngredients.filter(i => typeof i.percent !== 'number');
+        const knownPercentTotal = withPercent.reduce((s, i) => s + (i.percent || 0), 0);
+        
+        console.log(`[Food] Using extracted ingredients: ${withPercent.length} with %, ${withoutPercent.length} without %`);
+        
         aiResult.process.inputInstances = extractedIngredients.map((ing) => {
             let grams = 0;
             if (typeof ing.percent === 'number' && totalGrams) {
@@ -419,13 +446,30 @@ Output JSON only.
                 quantity: grams
             };
         });
-        if (totalGrams && knownPercentTotal > 0 && knownPercentTotal < 100) {
+        
+        if (totalGrams && withoutPercent.length > 0 && knownPercentTotal < 100) {
+            const usedGrams = aiResult.process.inputInstances.reduce((s: number, i: any) => s + (i.quantity || 0), 0);
+            const availableForDistribution = totalGrams - usedGrams;
+            const perIngredient = Math.floor(availableForDistribution / withoutPercent.length);
+            console.log(`[Food] Distributing ${availableForDistribution}g among ${withoutPercent.length} ingredients (~${perIngredient}g each)`);
+            
+            for (const input of aiResult.process.inputInstances) {
+                if (input.quantity === 0) {
+                    input.quantity = perIngredient;
+                }
+            }
+        }
+        
+        if (totalGrams && knownPercentTotal > 0 && knownPercentTotal < 100 && withPercent.length > 0) {
             const remainder = Math.max(0, totalGrams - aiResult.process.inputInstances.reduce((s: number, i: any) => s + (i.quantity || 0), 0));
             const water = aiResult.process.inputInstances.find((i: any) => {
                 const n = (i?.instance?.type || i?.instance?.name || '').toLowerCase();
                 return n.includes('water') || n.includes('víz');
             });
-            if (water) water.quantity = (water.quantity || 0) + remainder;
+            if (water && remainder > 0) {
+                console.log(`[Food] Adding ${remainder}g remainder to water`);
+                water.quantity = (water.quantity || 0) + remainder;
+            }
         }
         if (!aiResult.description) {
             const names = extractedIngredients.map((i) => i.name).join(', ');
@@ -435,6 +479,28 @@ Output JSON only.
 
     if (aiResult?.process?.inputInstances) {
         normalizeInputQuantitiesToGrams(aiResult.process.inputInstances, totalGrams);
+    }
+
+    if (totalGrams && aiResult?.process?.inputInstances) {
+        const sum = aiResult.process.inputInstances.reduce((s: number, i: any) => s + (Number(i?.quantity) || 0), 0);
+        const remaining = Math.max(0, totalGrams - sum);
+        const text = `${aiResult.type || ''} ${aiResult.description || ''} ${query}`.toLowerCase();
+        const waterLikely = ['water', 'liquid', 'drink', 'beverage', 'soup', 'broth', 'juice', 'cleaner', 'detergent', 'vinegar', 'spray']
+            .some((k) => text.includes(k));
+        if (remaining > 0 && waterLikely) {
+            const water = aiResult.process.inputInstances.find((i: any) => {
+                const n = (i?.instance?.type || i?.instance?.name || '').toLowerCase();
+                return n.includes('water') || n.includes('víz');
+            });
+            if (water) {
+                water.quantity = (water.quantity || 0) + remaining;
+            } else {
+                aiResult.process.inputInstances.push({
+                    instance: { type: 'Water', category: 'ingredient' },
+                    quantity: remaining
+                });
+            }
+        }
     }
     
     if (aiResult && aiResult.process) {
