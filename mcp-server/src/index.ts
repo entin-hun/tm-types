@@ -13,6 +13,11 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import { runExtraction } from "./ai-service.js";
+import { suggestFood } from "./food-service.js";
+import { suggestNonFood, decomposeNonFood } from "./non-food-service.js";
 
 dotenv.config();
 
@@ -405,6 +410,95 @@ function updateTreeView(changes: { interfaceName: string; newFields: { name: str
     console.error(`Error updating tree view: ${error.message}`);
   }
 }
+
+// Express Server Setup
+const app = express();
+const HTTP_PORT = process.env.HTTP_PORT || 3456; 
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-ai-provider']
+}));
+app.use(express.json({ limit: '10mb' }));
+
+app.post('/extract', async (req, res) => {
+  try {
+      const { text, attachments } = req.body;
+      if (!text && (!attachments || attachments.length === 0)) {
+          return res.status(400).json({ error: "Text or attachments required" });
+      }
+      
+      console.error(`[HTTP] Extraction requested for ${text?.slice(0, 50)}...`);
+      const result = await runExtraction({ text, attachments });
+      res.json(result);
+  } catch (error: any) {
+      console.error('[HTTP] Extraction error:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/suggest/food', async (req, res) => {
+  try {
+      console.error(`[HTTP] Food suggestion requested`);
+      const authHeader = req.headers.authorization;
+      const providerHeader = req.headers['x-ai-provider'];
+      
+      let apiKeys: any = {};
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+           const key = authHeader.split(' ')[1];
+           const provider = (typeof providerHeader === 'string' ? providerHeader.toLowerCase() : 'groq');
+           if (provider.includes('gemini')) apiKeys.geminiKey = key;
+           else if (provider.includes('openrouter')) apiKeys.openRouterKey = key;
+           else apiKeys.groqKey = key; 
+      }
+
+      const result = await suggestFood(req.body, apiKeys);
+      res.json(result);
+  } catch (error: any) {
+      console.error('[HTTP] Suggest Food error:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/suggest/non-food', async (req, res) => {
+  try {
+      console.error(`[HTTP] Non-food suggestion requested`);
+      const result = await suggestNonFood(req.body);
+      res.json(result);
+  } catch (error: any) {
+      console.error('[HTTP] Suggest Non-Food error:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/decompose/non-food', async (req, res) => {
+  try {
+      console.error(`[HTTP] Non-food decomposition requested`);
+      const authHeader = req.headers.authorization;
+      const providerHeader = req.headers['x-ai-provider'];
+      
+      let apiKeys: any = {};
+      let provider = 'groq'; // default
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+           const key = authHeader.split(' ')[1];
+           provider = (typeof providerHeader === 'string' ? providerHeader.toLowerCase() : 'groq');
+           if (provider.includes('gemini')) apiKeys.geminiKey = key;
+           else if (provider.includes('openrouter')) apiKeys.openRouterKey = key;
+           else apiKeys.groqKey = key; 
+      }
+
+      const result = await decomposeNonFood(req.body, apiKeys, provider);
+      res.json(result);
+  } catch (error: any) {
+      console.error('[HTTP] Decompose Non-Food error:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(HTTP_PORT, () => {
+    console.error(`[HTTP] Extraction server running on port ${HTTP_PORT}`);
+});
 
 // Define MCP tools
 const tools: Tool[] = [

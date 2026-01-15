@@ -44,6 +44,60 @@ function parseJSON(text: string) {
     }
 }
 
+function toGrams(value?: number, unit?: string): number {
+    if (typeof value !== 'number' || !isFinite(value)) return 0;
+    const u = (unit || '').toLowerCase();
+    if (u === 'kg' || u === 'kilogram' || u === 'kilograms') return Math.round(value * 1000);
+    if (u === 'g' || u === 'gram' || u === 'grams') return Math.round(value);
+    if (u === 'l' || u === 'liter' || u === 'litre') return Math.round(value * 1000);
+    if (u === 'ml' || u === 'milliliter' || u === 'millilitre') return Math.round(value);
+    return Math.round(value);
+}
+
+function normalizeExtractionResult(raw: any) {
+    if (!raw || typeof raw !== 'object') return raw;
+    const populated = raw.populated || {};
+    const instance = populated.instance || {};
+    const process = populated.process || {};
+
+    const instanceName = instance.name || instance.type || 'Unknown Product';
+    const instanceQty = toGrams(instance.quantity?.value, instance.quantity?.unit);
+
+    const inputInstances = Array.isArray(process.inputInstances) ? process.inputInstances : [];
+    const normalizedInputs = inputInstances.map((input: any) => {
+        const name = input?.name || input?.instance?.type || input?.instance?.name || 'Unknown Input';
+        const grams = toGrams(input?.amount?.value, input?.amount?.unit);
+        return {
+            type: 'local',
+            quantity: grams,
+            instance: {
+                category: 'food',
+                type: name,
+                bio: false,
+                quantity: 0
+            }
+        };
+    });
+
+    return {
+        summary: raw.summary || `Found ${normalizedInputs.length} inputs`,
+        populated: {
+            instance: {
+                category: 'food',
+                type: instanceName,
+                bio: false,
+                quantity: instanceQty,
+                description: instance.description
+            },
+            process: {
+                type: 'blending',
+                timestamp: Date.now(),
+                inputInstances: normalizedInputs
+            }
+        }
+    };
+}
+
 export async function runExtraction(req: ExtractionRequest) {
     const keys = getAIKeys();
     
@@ -106,7 +160,7 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
             if (res.ok) {
                 const data: any = await res.json();
                 const content = data.choices[0]?.message?.content;
-                return parseJSON(content);
+                return normalizeExtractionResult(parseJSON(content));
             } else {
                 console.error('[AI] Groq failed:', await res.text());
             }
@@ -119,7 +173,7 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
     if (keys.geminiKey) {
         try {
             console.error('[AI] Using Gemini...');
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${keys.geminiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${keys.geminiKey}`;
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -130,7 +184,7 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
             if (res.ok) {
                 const data: any = await res.json();
                 const content = data.candidates[0]?.content?.parts[0]?.text;
-                return parseJSON(content);
+                return normalizeExtractionResult(parseJSON(content));
             }
         } catch (e) {
             console.error('[AI] Gemini error:', e);

@@ -40,6 +40,7 @@ interface SuggestionParams {
     type?: string;
     ids?: { id: string; registry: string }[];
     query?: string;
+    quantity?: number;
 }
 
 interface ProductInstance {
@@ -110,6 +111,94 @@ function normalizeProcessTypes(instance: ProductInstance, validTypes: string[], 
     }
 }
 
+function extractIngredientsFromText(text: string): { name: string; percent?: number }[] {
+    if (!text) return [];
+    const lower = text.toLowerCase();
+    const keywords = ['ingredients', 'composition', 'összetevők', 'zutaten', 'ingrédients', 'ingredientes', 'složení', 'zloženie'];
+    const matchKeyword = keywords.find(k => lower.includes(k));
+    if (!matchKeyword) return [];
+
+    const idx = lower.lastIndexOf(matchKeyword);
+    const slice = text.slice(idx, idx + 2000);
+    const line = slice.replace(/\s+/g, ' ');
+
+    const pattern = new RegExp(`${matchKeyword}\s*[:\-]\s*([^\.]+)`, 'i');
+    const match = line.match(pattern);
+    const raw = match ? match[1] : line.slice(matchKeyword.length);
+
+    const cleaned = raw
+        .replace(/\<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const parsePercent = (s: string): number | undefined => {
+        const ltMatch = s.match(/<\s*(\d+(?:[\.,]\d+)?)\s*%/);
+        if (ltMatch) return parseFloat(ltMatch[1].replace(',', '.'));
+        const match = s.match(/(\d+(?:[\.,]\d+)?)\s*%/);
+        if (match) return parseFloat(match[1].replace(',', '.'));
+        return undefined;
+    };
+
+    return cleaned
+        .split(/,|;|\(|\)/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => s.replace(/^[-–•]+\s*/g, '').trim())
+        .map((s) => {
+            const percent = parsePercent(s);
+            const name = s.replace(/\d+(?:[\.,]\d+)?\s*%/g, '').trim();
+            return { name, percent };
+        })
+        .filter((s) => s.name.length > 1);
+}
+
+function inferTotalGrams(query: string, contextText: string, ids?: { id: string; registry: string }[], explicitQuantity?: number): number | null {
+    if (typeof explicitQuantity === 'number' && explicitQuantity > 0) return explicitQuantity;
+    const sources = [query, contextText, ...(ids || []).map((i) => i.id || '')].join(' ');
+    const lower = sources.toLowerCase();
+
+    const literMatch = lower.match(/(\d+(?:[\.,]\d+)?)\s*(l|liter|litre)\b/);
+    if (literMatch) return Math.round(parseFloat(literMatch[1].replace(',', '.')) * 1000);
+
+    const mlMatch = lower.match(/(\d+(?:[\.,]\d+)?)\s*ml\b/);
+    if (mlMatch) return Math.round(parseFloat(mlMatch[1].replace(',', '.')));
+
+    const kgMatch = lower.match(/(\d+(?:[\.,]\d+)?)\s*kg\b/);
+    if (kgMatch) return Math.round(parseFloat(kgMatch[1].replace(',', '.')) * 1000);
+
+    const gMatch = lower.match(/(\d+(?:[\.,]\d+)?)\s*g\b/);
+    if (gMatch) return Math.round(parseFloat(gMatch[1].replace(',', '.')));
+
+    if (lower.includes('1l') || lower.includes('1 liter') || lower.includes('1 litre')) return 1000;
+    return null;
+}
+
+function normalizeInputQuantitiesToGrams(inputInstances: any[], totalGrams: number | null) {
+    if (!totalGrams || !Array.isArray(inputInstances) || inputInstances.length === 0) return;
+    const qtys = inputInstances.map((i) => Number(i?.quantity || 0));
+    const sum = qtys.reduce((a, b) => a + b, 0);
+    const looksLikePercent = sum > 0 && sum <= 110 && qtys.every((q) => q >= 0 && q <= 100);
+    if (!looksLikePercent) return;
+
+    let gramsSum = 0;
+    for (const input of inputInstances) {
+        const percent = Number(input?.quantity || 0);
+        const grams = Math.round((totalGrams * percent) / 100);
+        input.quantity = grams;
+        gramsSum += grams;
+    }
+
+    if (gramsSum < totalGrams) {
+        const water = inputInstances.find((i) => {
+            const n = (i?.instance?.type || i?.instance?.name || '').toLowerCase();
+            return n.includes('water') || n.includes('víz');
+        });
+        if (water) {
+            water.quantity = (water.quantity || 0) + (totalGrams - gramsSum);
+        }
+    }
+}
+
 export async function suggestFood(params: SuggestionParams, transientKeys?: AIConfig): Promise<any> {
     const configKeys = getAIKeys();
     const keys = { ...configKeys, ...transientKeys };
@@ -141,13 +230,17 @@ export async function suggestFood(params: SuggestionParams, transientKeys?: AICo
                     const cleanBody = body.replace(/\s+/g, ' ');
                     const tailWindow = 8000;
                     let textExtract = cleanBody.slice(Math.max(0, cleanBody.length - tailWindow));
-                    const keywords = ['ingredients', 'composition'];
+                    const keywords = ['ingredients', 'composition', 'összetevők', 'zutaten', 'ingrédients', 'ingredientes', 'složení', 'zloženie'];
                     const lowerBody = cleanBody.toLowerCase();
                     const match = keywords.find(k => lowerBody.includes(k));
                     if (match) {
                         const ingrIndex = lowerBody.lastIndexOf(match);
                         const start = Math.max(0, ingrIndex);
-                        textExtract = cleanBody.slice(start, start + 7000);
+                        // Extract a larger window around the keyword to ensure we capture the list
+                        // Using a sliding window: 100 chars before, 2000 after
+                        const safeStart = Math.max(0, ingrIndex - 100);
+                        textExtract = cleanBody.slice(safeStart, safeStart + 3000);
+                        console.log(`[Food] Found ingredient keyword '${match}' at index ${ingrIndex}. Extracting...`);
                     }
                     contextText += `\n--- Context from ${ref.id} ---\nJSON-LD: ${jsonLd}\nText: ${textExtract}\n----------------\n`;
                 } catch(e) { console.error(`[Food] Failed to scrape ${ref.id}`, e); }
@@ -216,35 +309,85 @@ Context Info: ${JSON.stringify(params)}
 Scraped Context: "${contextText}"
 Potential Reference Products: ${JSON.stringify(candidates, null, 2)}
 
-Task: Construct a "Product Instance" JSON object.
+Task: Decompose this food product into a valid Product Instance JSON object (flat structure, no root wrapper).
+Expected Structure:
+{
+  "category": "food",
+  "type": "Product Name",
+  "description": "Detailed description",
+  "quantity": 0,
+  "process": {
+      "type": "...", 
+      "inputInstances": [ 
+          { "instance": { "type": "Ingredient Name", "category": "ingredient" }, "quantity": 0.1 } 
+      ]
+  }
+}
+
 Rules:
-1. Root is product.
+1. Do not wrap the result in "product" or any other root key. Return the object directly.
 2. 'process.type' strictly one of: [${validProcessTypes.map(t => `'${t}'`).join(', ')}].
 3. Exclude 'harvest'/'sale' unless explicit.
-4. Input instances from Context or candidates.
+4. Input instances from Context or candidates. Extract all ingredients found.
 5. Quantity: real usage for parents, 0 if unknown (never 1000 default).
-6. Price: Strictly empty.
+6. Price: Do not include.
 7. IDs: Use candidates if matching.
 Output JSON only.
 `;
      
     let aiResult = null;
-    const activeKey = keys.groqKey || keys.openRouterKey || keys.geminiKey;
+    const extractedIngredients = extractIngredientsFromText(contextText);
+    const totalGrams = inferTotalGrams(query, contextText, params.ids, params.quantity);
     
-    if (activeKey) {
+    if (keys.groqKey) {
         try {
-             const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${activeKey}`, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': `Bearer ${keys.groqKey}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     model: 'llama-3.3-70b-versatile',
                     messages: [{ role: 'user', content: prompt }],
                     temperature: 0.1
                 })
             });
-            if(res.ok) {
+            if (res.ok) {
                 const data: any = await res.json();
-                const content = data.choices[0]?.message?.content;
+                const content = data.choices[0]?.message?.content || '';
+                const match = content.match(/\{[\s\S]*\}/);
+                if (match) aiResult = JSON.parse(match[0]);
+            }
+        } catch(e) {}
+    } else if (keys.openRouterKey) {
+        try {
+            const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${keys.openRouterKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai/gpt-4o-mini',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.1
+                })
+            });
+            if (res.ok) {
+                const data: any = await res.json();
+                const content = data.choices[0]?.message?.content || '';
+                const match = content.match(/\{[\s\S]*\}/);
+                if (match) aiResult = JSON.parse(match[0]);
+            }
+        } catch(e) {}
+    } else if (keys.geminiKey) {
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${keys.geminiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.1 }
+                })
+            });
+            if (res.ok) {
+                const data: any = await res.json();
+                const content = data.candidates?.[0]?.content?.parts?.map((p: any) => p.text || '').join('') || '';
                 const match = content.match(/\{[\s\S]*\}/);
                 if (match) aiResult = JSON.parse(match[0]);
             }
@@ -261,6 +404,37 @@ Output JSON only.
             price: { amount: 0, currency: "", type: "budget" },
             process: { type: 'blending', inputInstances: [] }
         };
+    }
+    
+    if (aiResult && (!aiResult.process || !Array.isArray(aiResult.process.inputInstances) || aiResult.process.inputInstances.length === 0) && extractedIngredients.length > 0) {
+        aiResult.process = aiResult.process || { type: 'blending', inputInstances: [] };
+        const knownPercentTotal = extractedIngredients.reduce((s, i) => s + (i.percent || 0), 0);
+        aiResult.process.inputInstances = extractedIngredients.map((ing) => {
+            let grams = 0;
+            if (typeof ing.percent === 'number' && totalGrams) {
+                grams = Math.round((totalGrams * ing.percent) / 100);
+            }
+            return {
+                instance: { type: ing.name, category: 'ingredient' },
+                quantity: grams
+            };
+        });
+        if (totalGrams && knownPercentTotal > 0 && knownPercentTotal < 100) {
+            const remainder = Math.max(0, totalGrams - aiResult.process.inputInstances.reduce((s: number, i: any) => s + (i.quantity || 0), 0));
+            const water = aiResult.process.inputInstances.find((i: any) => {
+                const n = (i?.instance?.type || i?.instance?.name || '').toLowerCase();
+                return n.includes('water') || n.includes('víz');
+            });
+            if (water) water.quantity = (water.quantity || 0) + remainder;
+        }
+        if (!aiResult.description) {
+            const names = extractedIngredients.map((i) => i.name).join(', ');
+            aiResult.description = `Ingredients extracted from source: ${names}`;
+        }
+    }
+
+    if (aiResult?.process?.inputInstances) {
+        normalizeInputQuantitiesToGrams(aiResult.process.inputInstances, totalGrams);
     }
     
     if (aiResult && aiResult.process) {
