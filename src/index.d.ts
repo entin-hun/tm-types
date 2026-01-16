@@ -137,6 +137,36 @@ export interface Transport {
 
 export type TransportMethod = "air" | "sea" | "land";
 
+export type EcoLabel =
+  | "organic"
+  | "fair-trade"
+  | "carbon-neutral"
+  | "plastic-free"
+  | "bpa-free"
+  | "non-gmo"
+  | "recyclable"
+  | "biodegradable"
+  | "compostable"
+  | "fsc-certified"
+  | "rainforest-alliance"
+  | "cruelty-free"
+  | "vegan"
+  | "vegetarian"
+  | "gluten-free"
+  | "dairy-free"
+  | "local"
+  | "seasonal"
+  | "sustainable-sourcing"
+  | "renewable-energy"
+  | "zero-waste"
+  | "upcycled"
+  | "regenerative"
+  | "b-corp"
+  | "eu-ecolabel"
+  | "blue-angel"
+  | "energy-star"
+  | "water-efficient";
+
 export interface ProductInstanceBase {
   type: string;
   ownerId?: string;
@@ -147,6 +177,9 @@ export interface ProductInstanceBase {
   title?: string;
   description?: string;
   pictureURL?: string;
+  labels?: string[]; // Flexible array for any certification/attribute
+  ecoLabels?: EcoLabel[]; // Typed common eco-certifications
+  qualityAttributes?: string[]; // Quality/safety highlights (e.g., "BPA-free", "Lead-free")
 }
 
 export interface FoodInstance extends ProductInstanceBase {

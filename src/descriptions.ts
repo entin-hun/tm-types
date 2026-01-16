@@ -89,6 +89,21 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'Picture URL',
         description: 'URL to product image displayed in the UI',
       },
+      labels: {
+        label: 'Labels',
+        description: 'Flexible array for any certification, attribute, or quality highlight',
+        examples: ['Kosher', 'Halal', 'Lactose-free', 'Paleo', 'Keto-friendly'],
+      },
+      ecoLabels: {
+        label: 'Eco Labels',
+        description: 'Standardized environmental and sustainability certifications',
+        examples: ['organic', 'fair-trade', 'carbon-neutral', 'bpa-free', 'non-gmo', 'recyclable', 'fsc-certified'],
+      },
+      qualityAttributes: {
+        label: 'Quality Attributes',
+        description: 'Safety and quality highlights displayed as badges',
+        examples: ['BPA-free', 'Lead-free', 'Phthalate-free', 'Pesticide-free', 'Hormone-free'],
+      },
     },
   },
   FoodInstance: {

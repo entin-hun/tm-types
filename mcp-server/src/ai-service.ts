@@ -136,6 +136,8 @@ export async function runExtraction(req: ExtractionRequest, transientKeys?: AICo
     const keys = transientKeys?.geminiKey || transientKeys?.groqKey || transientKeys?.openRouterKey
         ? { ...getAIKeys(), ...transientKeys }
         : getAIKeys();
+    const startedAt = Date.now();
+    console.error(`[AI] runExtraction start hasGroqKey=${!!keys.groqKey} hasGeminiKey=${!!keys.geminiKey} hasOpenRouterKey=${!!keys.openRouterKey}`);
     
     // Construct Prompt
     const prompt = `
@@ -181,6 +183,8 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
     if (keys.groqKey) {
         try {
             console.error('[AI] Using Groq...');
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000);
             const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -191,14 +195,18 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
                     model: 'llama-3.3-70b-versatile',
                     messages: [{ role: 'user', content: prompt }],
                     temperature: 0.1
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeout);
             if (res.ok) {
                 const data: any = await res.json();
                 const content = data.choices[0]?.message?.content;
+                console.error(`[AI] Groq response ok durationMs=${Date.now() - startedAt}`);
                 return normalizeExtractionResult(parseJSON(content));
             } else {
-                console.error('[AI] Groq failed:', await res.text());
+                const errorText = await res.text();
+                console.error('[AI] Groq failed:', errorText);
             }
         } catch (e) {
             console.error('[AI] Groq error:', e);
@@ -214,16 +222,21 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
             const modelPath = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
             console.error(`[AI] Using Gemini model: ${modelPath}`);
             const url = `https://generativelanguage.googleapis.com/v1/${modelPath}:generateContent?key=${keys.geminiKey}`;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000);
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }]
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeout);
             if (res.ok) {
                 const data: any = await res.json();
                 const content = data.candidates[0]?.content?.parts[0]?.text;
+                console.error(`[AI] Gemini response ok durationMs=${Date.now() - startedAt}`);
                 return normalizeExtractionResult(parseJSON(content));
             }
         } catch (e) {
@@ -231,5 +244,6 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
         }
     }
 
+    console.error(`[AI] runExtraction failed durationMs=${Date.now() - startedAt}`);
     return { error: "No AI provider available or all failed" };
 }

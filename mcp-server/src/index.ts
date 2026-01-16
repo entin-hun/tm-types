@@ -431,19 +431,43 @@ function emitAgUi(eventType: string, payload?: any, requestId?: string) {
   agUiEmitter.emit("ag-ui", message);
 }
 
-app.use(cors({
+const corsOptions = {
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-ai-provider', 'x-ai-model']
-}));
+};
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  const requestId = req.headers['x-request-id'] || randomUUID();
+  console.error(`[HTTP] ${req.method} ${req.path} start requestId=${requestId}`);
+
+  res.on('finish', () => {
+    const durationMs = Date.now() - start;
+    console.error(`[HTTP] ${req.method} ${req.path} completed requestId=${requestId} status=${res.statusCode} durationMs=${durationMs}`);
+  });
+
+  res.on('close', () => {
+    if (!res.writableEnded) {
+      const durationMs = Date.now() - start;
+      console.error(`[HTTP] ${req.method} ${req.path} closed early requestId=${requestId} durationMs=${durationMs}`);
+    }
+  });
+
+  next();
+});
 
 app.get('/ag-ui/stream', (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
-    'X-Accel-Buffering': 'no'
+    'X-Accel-Buffering': 'no',
+    'Access-Control-Allow-Origin': corsOptions.origin,
+    'Access-Control-Allow-Methods': corsOptions.methods.join(', '),
+    'Access-Control-Allow-Headers': corsOptions.allowedHeaders.join(', ')
   });
 
   const send = (message: AgUiMessage) => {
@@ -506,6 +530,27 @@ app.post('/extract', async (req, res) => {
       console.error('[HTTP] Extraction error:', error);
       emitAgUi('extract-error', { message: error.message }, undefined);
       res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/just-chat', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ error: "Text required" });
+    }
+    const requestId = randomUUID();
+    console.error(`[HTTP] Just chat start requestId=${requestId}`);
+    emitAgUi('just-chat-start', { prompt: text }, requestId);
+    const startedAt = Date.now();
+    const result = await runExtraction({ text }, {});
+    console.error(`[HTTP] Just chat runExtraction complete requestId=${requestId} durationMs=${Date.now() - startedAt}`);
+    emitAgUi('just-chat-complete', { ok: true }, requestId);
+    res.json(result);
+  } catch (error: any) {
+    console.error('[HTTP] Just chat error:', error);
+    emitAgUi('just-chat-error', { message: error.message }, undefined);
+    res.status(500).json({ error: error.message });
   }
 });
 
