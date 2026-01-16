@@ -177,9 +177,6 @@ export interface ProductInstanceBase {
   title?: string;
   description?: string;
   pictureURL?: string;
-  labels?: string[]; // Flexible array for any certification/attribute
-  ecoLabels?: EcoLabel[]; // Typed common eco-certifications
-  qualityAttributes?: string[]; // Quality/safety highlights (e.g., "BPA-free", "Lead-free")
 }
 
 export interface FoodInstance extends ProductInstanceBase {
@@ -190,12 +187,18 @@ export interface FoodInstance extends ProductInstanceBase {
   grade?: string;
   size?: string;
   process?: Process;
+  labels?: string[]; // Flexible food attributes (e.g., "low-sugar", "keto")
+  ecoLabels?: EcoLabel[]; // Eco certifications (e.g., organic, fair-trade)
+  qualityAttributes?: string[]; // Safety/quality (e.g., pesticide-free)
 }
 
 export interface CartridgeInstance extends ProductInstanceBase {
   category: "cartridge";
   grade: string;
   size: string;
+  labels?: string[]; // Flexible cartridge attributes (e.g., "food-safe")
+  ecoLabels?: EcoLabel[]; // Eco certifications (e.g., recyclable)
+  qualityAttributes?: string[]; // Safety/quality (e.g., BPA-free, lead-free)
 }
 
 export type ProductInstance = FoodInstance | CartridgeInstance;

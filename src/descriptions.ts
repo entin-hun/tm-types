@@ -138,6 +138,21 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'Process',
         description: 'The production/handling process that created this product - displayed as expandable tree node with icon (harvest, milling, freeze-drying, blending, printing, sale)',
       },
+      labels: {
+        label: 'Labels',
+        description: 'Food-specific attributes and marketing highlights',
+        examples: ['low-sugar', 'keto', 'halal', 'kosher', 'lactose-free', 'nut-free'],
+      },
+      ecoLabels: {
+        label: 'Eco Labels',
+        description: 'Environmental and sustainability certifications for food products',
+        examples: ['organic', 'fair-trade', 'carbon-neutral', 'plastic-free', 'non-gmo'],
+      },
+      qualityAttributes: {
+        label: 'Quality Attributes',
+        description: 'Safety/quality highlights shown as badges',
+        examples: ['pesticide-free', 'hormone-free', 'antibiotic-free', 'cold-pressed'],
+      },
     },
   },
   CartridgeInstance: {
@@ -153,6 +168,21 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'Size',
         description: 'Physical size classification of the cartridge',
         examples: ['small', 'medium', 'large', '100g', '500g'],
+      },
+      labels: {
+        label: 'Labels',
+        description: 'Cartridge attributes and usage notes',
+        examples: ['food-safe', 'single-use', 'refillable', 'heat-resistant'],
+      },
+      ecoLabels: {
+        label: 'Eco Labels',
+        description: 'Environmental certifications for cartridges/packaging',
+        examples: ['recyclable', 'biodegradable', 'compostable', 'fsc-certified'],
+      },
+      qualityAttributes: {
+        label: 'Quality Attributes',
+        description: 'Safety/quality highlights for cartridges',
+        examples: ['BPA-free', 'lead-free', 'phthalate-free', 'food-contact safe'],
       },
     },
   },
