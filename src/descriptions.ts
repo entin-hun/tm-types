@@ -11,14 +11,14 @@ export interface FieldDescription {
 
 export interface TypeDescription {
   name: string;
-  description: string;
+  header: string;
   fields: Record<string, FieldDescription>;
 }
 
 export const typeDescriptions: Record<string, TypeDescription> = {
   Pokedex: {
     name: 'Pokedex',
-    description: 'Complete product record with blockchain references and supply chain data',
+    header: 'Complete product record with blockchain references and supply chain data',
     fields: {
       notes: {
         label: 'Notes',
@@ -44,7 +44,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   ProductInstance: {
     name: 'Product Instance',
-    description: 'A physical product tracked through its entire supply chain journey',
+    header: 'A physical product tracked through its entire supply chain journey',
     fields: {
       type: {
         label: 'Product Type',
@@ -108,7 +108,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   FoodInstance: {
     name: 'Food Instance',
-    description: 'A food product with nutritional data, processing history, and environmental impact tracking',
+    header: 'A food product with nutritional data, processing history, and environmental impact tracking',
     fields: {
       iDs: {
         label: 'Registry IDs',
@@ -157,7 +157,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   NonFoodInstance: {
     name: 'Non-Food Instance',
-    description: 'A non-food product (e.g. cartridge, tool) used in production',
+    header: 'A non-food product (e.g. cartridge, tool) used in production',
     fields: {
       grade: {
         label: 'Grade',
@@ -188,7 +188,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   PackagingInstance: {
     name: 'Packaging Instance',
-    description: 'Packaging material used in production or distribution',
+    header: 'Packaging material used in production or distribution',
     fields: {
       material: {
         label: 'Material',
@@ -214,7 +214,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   InputInstance: {
     name: 'Input Instance',
-    description: 'A product used as an ingredient or material in a production process',
+    header: 'A product used as an ingredient or material in a production process',
     fields: {
       instance: {
         label: 'Product',
@@ -237,7 +237,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   LocalInputInstance: {
     name: 'Local Input',
-    description: 'An ingredient sourced from the same facility - no transportation required',
+    header: 'An ingredient sourced from the same facility - no transportation required',
     fields: {
       type: {
         label: 'Type',
@@ -247,7 +247,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   TransportedInputInstance: {
     name: 'Transported Input',
-    description: 'An ingredient that was shipped to the production facility',
+    header: 'An ingredient that was shipped to the production facility',
     fields: {
       type: {
         label: 'Type',
@@ -261,7 +261,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Transport: {
     name: 'Transport',
-    description: 'Shipping details for moving products between facilities - impacts carbon footprint',
+    header: 'Shipping details for moving products between facilities - impacts carbon footprint',
     fields: {
       method: {
         label: 'Shipping Method',
@@ -290,7 +290,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Process: {
     name: 'Process',
-    description: 'A production or handling step in the supply chain - displayed as expandable tree nodes with specific icons',
+    header: 'A production or handling step in the supply chain - displayed as expandable tree nodes with specific icons',
     fields: {
       type: {
         label: 'Process Type',
@@ -345,7 +345,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   PrintingProcess: {
     name: '3D Printing',
-    description: 'Additive manufacturing process creating food from cartridges',
+    header: 'Additive manufacturing process creating food from cartridges',
     fields: {
       machineInstance: {
         label: 'Printer',
@@ -363,7 +363,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   MillingProcess: {
     name: 'Milling',
-    description: 'Grinding or crushing process (e.g., wheat to flour)',
+    header: 'Grinding or crushing process (e.g., wheat to flour)',
     fields: {
       machineInstance: {
         label: 'Mill',
@@ -377,7 +377,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   FreezeDryingProcess: {
     name: 'Freeze-Drying',
-    description: 'Lyophilization process removing moisture while preserving nutrients',
+    header: 'Lyophilization process removing moisture while preserving nutrients',
     fields: {
       machineInstance: {
         label: 'Freeze Dryer',
@@ -391,7 +391,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   BlendingProcess: {
     name: 'Blending',
-    description: 'Mixing multiple ingredients together',
+    header: 'Mixing multiple ingredients together',
     fields: {
       machineInstance: {
         label: 'Blender',
@@ -405,7 +405,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   SaleProcess: {
     name: 'Sale',
-    description: 'Final sale to consumer - displayed with "Sold to you" label',
+    header: 'Final sale to consumer - displayed with "Sold to you" label',
     fields: {
       price: {
         label: 'Sale Price',
@@ -415,7 +415,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   HarvestProcess: {
     name: 'Harvesting',
-    description: 'Initial collection of raw agricultural products',
+    header: 'Initial collection of raw agricultural products',
     fields: {
       facility: {
         label: 'Farm',
@@ -425,7 +425,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   CookingProcess: {
     name: 'Cooking',
-    description: 'Thermal processing of food',
+    header: 'Thermal processing of food',
     fields: {
       method: {
         label: 'Method',
@@ -444,7 +444,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Facility: {
     name: 'Facility',
-    description: 'A physical location where processing occurs - shown on interactive map',
+    header: 'A physical location where processing occurs - shown on interactive map',
     fields: {
       label: {
         label: 'Name',
@@ -459,7 +459,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Site: {
     name: 'Site',
-    description: 'Legacy name for Facility',
+    header: 'Legacy name for Facility',
     fields: {
       label: {
         label: 'Name',
@@ -473,7 +473,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Price: {
     name: 'Price',
-    description: 'Financial information displayed with currency symbol in tree',
+    header: 'Financial information displayed with currency symbol in tree',
     fields: {
       amount: {
         label: 'Amount',
@@ -494,7 +494,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   TemperatureRange: {
     name: 'Temperature Range',
-    description: 'Temperature bounds during processing - displayed with thermostat icon',
+    header: 'Temperature bounds during processing - displayed with thermostat icon',
     fields: {
       min: {
         label: 'Minimum',
@@ -510,7 +510,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   MachineInstance: {
     name: 'Machine',
-    description: 'Equipment used in production processes - displayed with settings icon',
+    header: 'Equipment used in production processes - displayed with settings icon',
     fields: {
       category: {
         label: 'Machine Type',
@@ -547,7 +547,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Hr: {
     name: 'Human Resources',
-    description: 'Personnel assignment for equipment operation',
+    header: 'Personnel assignment for equipment operation',
     fields: {
       tasks: {
         label: 'Tasks',
@@ -562,7 +562,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   KnowHow: {
     name: 'Know-How',
-    description: 'Recipe or process instructions - displayed with numbered list icon',
+    header: 'Recipe or process instructions - displayed with numbered list icon',
     fields: {
       owner: {
         label: 'Owner',
@@ -596,7 +596,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Impact: {
     name: 'Environmental Impact',
-    description: 'Ecological footprint metrics - summed across supply chain and shown in badges',
+    header: 'Ecological footprint metrics - summed across supply chain and shown in badges',
     fields: {
       category: {
         label: 'Impact Category',
@@ -619,7 +619,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   CarbonImpact: {
     name: 'Carbon Footprint',
-    description: 'CO2 equivalent emissions - displayed as "X kg CO2e CARBON FOOTPRINT"',
+    header: 'CO2 equivalent emissions - displayed as "X kg CO2e CARBON FOOTPRINT"',
     fields: {
       quantity: {
         label: 'CO2e Amount',
@@ -629,7 +629,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   WaterImpact: {
     name: 'Water Footprint',
-    description: 'Water usage - displayed as "X l WATER FOOTPRINT"',
+    header: 'Water usage - displayed as "X l WATER FOOTPRINT"',
     fields: {
       quantity: {
         label: 'Water Volume',
@@ -639,7 +639,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   ID: {
     name: 'Registry ID',
-    description: 'Regulatory or certification identifiers - shown with fingerprint icon',
+    header: 'Regulatory or certification identifiers - shown with fingerprint icon',
     fields: {
       registry: {
         label: 'Registry Name',
@@ -655,7 +655,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   FallbackFoodNutrient: {
     name: 'Nutrient Value',
-    description: 'Nutritional content per 100g - displayed as bar charts with RDI percentages',
+    header: 'Nutritional content per 100g - displayed as bar charts with RDI percentages',
     fields: {
       amount: {
         label: 'Amount',
@@ -669,7 +669,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
   },
   Location: {
     name: 'Location',
-    description: 'GeoJSON Point with GPS coordinates - displayed on interactive satellite map',
+    header: 'GeoJSON Point with GPS coordinates - displayed on interactive satellite map',
     fields: {
       type: {
         label: 'Type',
