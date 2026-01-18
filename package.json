@@ -19,7 +19,8 @@
     "blockchain"
   ],
   "scripts": {
-    "prepublishOnly": "npm run validate",
+    "prepublishOnly": "npm run validate && npm run generate-json",
+    "generate-json": "npx ts-node generate-json.ts",
     "validate": "tsc --noEmit",
     "version": "git add -A",
     "postversion": "git push && git push --tags"
