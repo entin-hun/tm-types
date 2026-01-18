@@ -61,8 +61,6 @@ export type Process =
   | BlendingProcess
   | SaleProcess
   | HarvestProcess
-  | PackagingProcess
-  | StorageProcess
   | CookingProcess;
 
 export interface GenericProcess {
@@ -109,22 +107,9 @@ export interface HarvestProcess extends GenericProcess {
   type: "harvest";
 }
 
-export interface PackagingProcess extends GenericProcess {
-  type: "packaging";
-  packaging: TokenIdOr<PackagingInstance>[];
-  machineInstance?: TokenIdOr<MachineInstance>;
-}
-
-export interface StorageProcess extends GenericProcess {
-  type: "storage";
-  conditions: "ambient" | "refrigerated" | "frozen" | "controlled-atmosphere";
-  machineInstance?: TokenIdOr<MachineInstance>; // e.g. freezer unit
-}
-
 export interface CookingProcess extends GenericProcess {
   type: "cooking";
   method: "baking" | "boiling" | "frying" | "steaming" | "roasting" | "sous-vide" | "grilling";
-  temperature?: number; // C
   machineInstance?: TokenIdOr<MachineInstance>; // e.g. oven
   knowHow?: TokenIdOr<KnowHow>;
 }

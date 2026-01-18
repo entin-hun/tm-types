@@ -295,7 +295,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       type: {
         label: 'Process Type',
         description: 'The kind of processing applied',
-        examples: ['printing', 'milling', 'freezedrying', 'blending', 'sale', 'harvest', 'packaging', 'storage', 'cooking'],
+        examples: ['printing', 'milling', 'freezedrying', 'blending', 'sale', 'harvest', 'cooking'],
       },
       timestamp: {
         label: 'Time',
@@ -423,35 +423,6 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
     },
   },
-  PackagingProcess: {
-    name: 'Packaging',
-    description: 'Wrapping or bottling the product',
-    fields: {
-      packaging: {
-        label: 'Materials',
-        description: 'Packaging materials used (boxes, bottles, films)',
-      },
-      machineInstance: {
-        label: 'Machine',
-        description: 'Packaging machine used (e.g. sealer, labeler)',
-      },
-    },
-  },
-  StorageProcess: {
-    name: 'Storage',
-    description: 'Holding products in specific conditions (affecting energy/quality)',
-    fields: {
-      conditions: {
-        label: 'Conditions',
-        description: 'Environment type (ambient, refrigerated, frozen)',
-        examples: ['refrigerated', 'frozen'],
-      },
-      machineInstance: {
-        label: 'Cooling Unit',
-        description: 'Refrigeration or climate control equipment',
-      },
-    },
-  },
   CookingProcess: {
     name: 'Cooking',
     description: 'Thermal processing of food',
@@ -460,10 +431,6 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'Method',
         description: 'Cooking technique applied',
         examples: ['baking', 'boiling', 'frying'],
-      },
-      temperature: {
-        label: 'Temperature',
-        description: 'sustained temperature (C)',
       },
       machineInstance: {
         label: 'Appliance',
