@@ -504,11 +504,6 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       max: {
         label: 'Maximum',
         description: 'Highest temperature in Celsius during the process',
-      ratedPowerKW: {
-        label: 'Rated Power (kW)',
-        description: 'Power consumption rating in kilowatts',
-        examples: ['0.5', '1.2', '5.0'],
-      },
         examples: ['25', '80', '150', '200'],
       },
     },
@@ -534,6 +529,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'Size',
         description: 'Physical size or capacity classification',
         examples: ['small', 'medium', 'large', 'industrial'],
+      },
+      ratedPowerKW: {
+        label: 'Rated Power (kW)',
+        description: 'Power consumption rating in kilowatts',
+        examples: ['0.5', '1.2', '5.0'],
       },
       hr: {
         label: 'Tasks',
