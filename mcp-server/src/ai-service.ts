@@ -6,6 +6,9 @@ export interface AIConfig {
     geminiKey?: string;
     groqKey?: string;
     modelName?: string;
+    groqModelName?: string;
+    geminiModelName?: string;
+    openRouterModelName?: string;
 }
 
 const CONFIG_PATH = '/opt/lca-chat/data/config.json';
@@ -25,6 +28,16 @@ export function getAIKeys(): AIConfig {
 interface ExtractionRequest {
     text: string;
     attachments?: { name: string; content: string }[];
+}
+
+interface ChatRequest {
+    text: string;
+    system?: string;
+    history?: { role: 'user' | 'assistant' | 'system'; content: string }[];
+}
+
+interface ChatRequest {
+    text: string;
 }
 
 function parseJSON(text: string) {
@@ -138,7 +151,7 @@ export async function runExtraction(req: ExtractionRequest, transientKeys?: AICo
         : getAIKeys();
     const startedAt = Date.now();
     console.error(`[AI] runExtraction start hasGroqKey=${!!keys.groqKey} hasGeminiKey=${!!keys.geminiKey} hasOpenRouterKey=${!!keys.openRouterKey}`);
-    
+
     // Construct Prompt
     const prompt = `
 You are an expert Life Cycle Assessment (LCA) data extractor.
@@ -165,7 +178,6 @@ Output Structure (JSON only):
     }
   }
 }
-
 Rules:
 1. Extract as much detail as possible.
 2. Normalize units to standard metric if possible (kg, g, l, ml, kWh).
@@ -212,16 +224,16 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
             console.error('[AI] Groq error:', e);
         }
     }
-    
+
     // Try Gemini
     if (keys.geminiKey) {
         try {
-            const modelName = keys.modelName && keys.modelName.startsWith('gemini') 
-                ? keys.modelName 
+            const modelName = keys.modelName && keys.modelName.startsWith('gemini')
+                ? keys.modelName
                 : 'gemini-1.5-flash';
             const modelPath = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
             console.error(`[AI] Using Gemini model: ${modelPath}`);
-            const url = `https://generativelanguage.googleapis.com/v1/${modelPath}:generateContent?key=${keys.geminiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/${modelPath}:generateContent?key=${keys.geminiKey}`;
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 30000);
             const res = await fetch(url, {
@@ -246,4 +258,129 @@ ${req.attachments?.map((a: any) => `Attachment (${a.name}):\n${a.content}`).join
 
     console.error(`[AI] runExtraction failed durationMs=${Date.now() - startedAt}`);
     return { error: "No AI provider available or all failed" };
+}
+
+export async function runChat(req: ChatRequest, transientKeys?: AIConfig, providerHint?: string) {
+    const keys = transientKeys?.geminiKey || transientKeys?.groqKey || transientKeys?.openRouterKey
+        ? { ...getAIKeys(), ...transientKeys }
+        : getAIKeys();
+
+    const startedAt = Date.now();
+    const provider = (providerHint || '').toLowerCase();
+    const systemPrompt = req.system || 'You are a helpful assistant.';
+    const messages = [
+        { role: 'system', content: systemPrompt },
+        ...(Array.isArray(req.history) ? req.history : []),
+        { role: 'user', content: req.text }
+    ];
+
+    const normalizedGenericModel = typeof keys.modelName === 'string' ? keys.modelName.trim() : '';
+    const normalizedGeminiModel = typeof keys.geminiModelName === 'string' ? keys.geminiModelName.trim() : '';
+    const normalizedGroqModel = typeof keys.groqModelName === 'string' ? keys.groqModelName.trim() : '';
+    const normalizedOpenRouterModel = typeof keys.openRouterModelName === 'string' ? keys.openRouterModelName.trim() : '';
+    const modelLooksGemini = normalizedGenericModel.startsWith('models/') || normalizedGenericModel.toLowerCase().includes('gemini');
+    const geminiModelName = normalizedGeminiModel || (modelLooksGemini ? normalizedGenericModel : '');
+    const groqModelName = normalizedGroqModel || (!modelLooksGemini ? normalizedGenericModel : '');
+    const openRouterModelName = normalizedOpenRouterModel || (!modelLooksGemini ? normalizedGenericModel : '');
+
+    console.error(`[AI] runChat start providerHint=${provider || 'none'} hasGroqKey=${!!keys.groqKey} hasGeminiKey=${!!keys.geminiKey} hasOpenRouterKey=${!!keys.openRouterKey}`);
+
+    const tryGroq = async () => {
+        if (!keys.groqKey) return null;
+        console.error('[AI] Chat Using Groq...');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${keys.groqKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: groqModelName || 'llama-3.3-70b-versatile',
+                messages,
+                temperature: 0.2
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+        if (!res.ok) {
+            console.error('[AI] Chat Groq failed:', await res.text());
+            return null;
+        }
+        const data: any = await res.json();
+        const content = data.choices[0]?.message?.content || '';
+        console.error(`[AI] Chat Groq response ok durationMs=${Date.now() - startedAt}`);
+        return { answer: content, provider: 'groq' };
+    };
+
+    const tryGemini = async () => {
+        if (!keys.geminiKey) return null;
+        const resolvedModelName = geminiModelName && geminiModelName.startsWith('gemini')
+            ? geminiModelName
+            : (geminiModelName || 'gemini-1.5-flash');
+        const modelPath = resolvedModelName.startsWith('models/') ? resolvedModelName : `models/${resolvedModelName}`;
+        console.error(`[AI] Chat Using Gemini model: ${modelPath}`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelPath}:generateContent?key=${keys.geminiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: `${systemPrompt}\n\n${req.text}` }] }]
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+        if (!res.ok) {
+            console.error('[AI] Chat Gemini failed:', await res.text());
+            return null;
+        }
+        const data: any = await res.json();
+        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        console.error(`[AI] Chat Gemini response ok durationMs=${Date.now() - startedAt}`);
+        return { answer: content, provider: 'gemini' };
+    };
+
+    const tryOpenRouter = async () => {
+        if (!keys.openRouterKey) return null;
+        console.error('[AI] Chat Using OpenRouter...');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${keys.openRouterKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: openRouterModelName || 'openai/gpt-4o-mini',
+                messages,
+                temperature: 0.2
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+        if (!res.ok) {
+            console.error('[AI] Chat OpenRouter failed:', await res.text());
+            return null;
+        }
+        const data: any = await res.json();
+        const content = data.choices?.[0]?.message?.content || '';
+        console.error(`[AI] Chat OpenRouter response ok durationMs=${Date.now() - startedAt}`);
+        return { answer: content, provider: 'openrouter' };
+    };
+
+    try {
+        if (provider.includes('gemini')) {
+            return (await tryGemini()) || (await tryGroq()) || (await tryOpenRouter()) || { error: 'No AI provider available or all failed' };
+        }
+        if (provider.includes('openrouter')) {
+            return (await tryOpenRouter()) || (await tryGroq()) || (await tryGemini()) || { error: 'No AI provider available or all failed' };
+        }
+        return (await tryGroq()) || (await tryGemini()) || (await tryOpenRouter()) || { error: 'No AI provider available or all failed' };
+    } catch (e) {
+        console.error('[AI] runChat error:', e);
+        return { error: 'Chat failed' };
+    }
 }

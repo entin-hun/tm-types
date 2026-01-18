@@ -20,21 +20,21 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     name: 'Pokedex',
     description: 'Complete product record with blockchain references and supply chain data',
     fields: {
-      description: {
-        label: 'Description',
-        description: 'HTML-formatted product description shown to consumers',
+      notes: {
+        label: 'Notes',
+        description: 'HTML-formatted product notes shown to consumers',
       },
-      contract: {
-        label: 'Contract',
+      roles: {
+        label: 'Roles',
         description: 'Blockchain smart contract address where the NFT is minted',
       },
       token: {
         label: 'Token',
         description: 'Unique NFT token identifier on the blockchain',
       },
-      feedchainVersion: {
-        label: 'Feedchain Version',
-        description: 'Version of the Feedchain protocol used to create this record',
+      typesVersion: {
+        label: 'Types Version',
+        description: 'Version of the Types protocol used to create this record',
       },
       instance: {
         label: 'Product Instance',
@@ -81,9 +81,9 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'Title',
         description: 'Optional display name for the product (overrides type)',
       },
-      description: {
-        label: 'Description',
-        description: 'Detailed product description shown to consumers',
+      notes: {
+        label: 'Notes',
+        description: 'Detailed product notes shown to consumers',
       },
       pictureURL: {
         label: 'Picture URL',
@@ -97,7 +97,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       ecoLabels: {
         label: 'Eco Labels',
         description: 'Standardized environmental and sustainability certifications',
-        examples: ['organic', 'fair-trade', 'carbon-neutral', 'bpa-free', 'non-gmo', 'recyclable', 'fsc-certified'],
+        examples: ['organic', 'fair-trade', 'carbon-neutral', 'bpa-free', 'non-gmo', 'recyclable', 'fsc-certified', 'palm-oil-free', 'refined-oil-free'],
       },
       qualityAttributes: {
         label: 'Quality Attributes',
@@ -155,34 +155,60 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
     },
   },
-  CartridgeInstance: {
-    name: 'Cartridge Instance',
-    description: 'A 3D printing cartridge used in food production',
+  NonFoodInstance: {
+    name: 'Non-Food Instance',
+    description: 'A non-food product (e.g. cartridge, tool) used in production',
     fields: {
       grade: {
         label: 'Grade',
-        description: 'Quality grade of the cartridge',
+        description: 'Quality grade of the item',
         examples: ['premium', 'standard', 'industrial'],
       },
       size: {
         label: 'Size',
-        description: 'Physical size classification of the cartridge',
+        description: 'Physical size classification',
         examples: ['small', 'medium', 'large', '100g', '500g'],
       },
       labels: {
         label: 'Labels',
-        description: 'Cartridge attributes and usage notes',
+        description: 'Attributes and usage notes',
         examples: ['food-safe', 'single-use', 'refillable', 'heat-resistant'],
       },
       ecoLabels: {
         label: 'Eco Labels',
-        description: 'Environmental certifications for cartridges/packaging',
+        description: 'Environmental certifications',
         examples: ['recyclable', 'biodegradable', 'compostable', 'fsc-certified'],
       },
       qualityAttributes: {
         label: 'Quality Attributes',
-        description: 'Safety/quality highlights for cartridges',
+        description: 'Safety/quality highlights',
         examples: ['BPA-free', 'lead-free', 'phthalate-free', 'food-contact safe'],
+      },
+    },
+  },
+  PackagingInstance: {
+    name: 'Packaging Instance',
+    description: 'Packaging material used in production or distribution',
+    fields: {
+      material: {
+        label: 'Material',
+        description: 'Primary material composition',
+        examples: ['cardboard', 'bioplastic', 'glass', 'aluminum'],
+      },
+      labels: {
+        label: 'Labels',
+        description: 'Packaging attributes',
+        examples: ['reusable', 'single-use'],
+      },
+      ecoLabels: {
+        label: 'Eco Labels',
+        description: 'Environmental certifications for packaging',
+        examples: ['recyclable', 'compostable', 'fsc-certified', 'plastic-free'],
+      },
+      qualityAttributes: {
+        label: 'Quality Attributes',
+        description: 'Safety/quality highlights',
+        examples: ['food-safe', 'BPA-free'],
       },
     },
   },
@@ -269,7 +295,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       type: {
         label: 'Process Type',
         description: 'The kind of processing applied',
-        examples: ['printing', 'milling', 'freezedrying', 'blending', 'sale', 'harvest'],
+        examples: ['printing', 'milling', 'freezedrying', 'blending', 'sale', 'harvest', 'packaging', 'storage', 'cooking'],
       },
       timestamp: {
         label: 'Time',
@@ -305,11 +331,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
       machineInstance: {
         label: 'Machine',
-        description: 'Equipment used for processing - shown with settings icon',
+        description: 'Equipment used for processing - can be full data or token ID reference',
       },
       knowHow: {
         label: 'Know-How',
-        description: 'Recipe or process instructions - shown with numbered list icon',
+        description: 'Recipe or process instructions - can be full data or token ID reference',
       },
       shape: {
         label: 'Shape',
@@ -323,11 +349,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     fields: {
       machineInstance: {
         label: 'Printer',
-        description: '3D food printer used',
+        description: '3D food printer used (object or token ID)',
       },
       knowHow: {
         label: 'Recipe',
-        description: 'Printing instructions and parameters',
+        description: 'Printing instructions and parameters (object or token ID)',
       },
       shape: {
         label: 'Shape URL',
@@ -341,11 +367,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     fields: {
       machineInstance: {
         label: 'Mill',
-        description: 'Milling equipment used',
+        description: 'Milling equipment used (object or token ID)',
       },
       knowHow: {
         label: 'Process Recipe',
-        description: 'Milling parameters and instructions',
+        description: 'Milling parameters and instructions (object or token ID)',
       },
     },
   },
@@ -355,11 +381,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     fields: {
       machineInstance: {
         label: 'Freeze Dryer',
-        description: 'Lyophilization equipment used',
+        description: 'Lyophilization equipment used (object or token ID)',
       },
       knowHow: {
         label: 'Process Recipe',
-        description: 'Temperature curve and timing',
+        description: 'Temperature curve and timing (object or token ID)',
       },
     },
   },
@@ -369,11 +395,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     fields: {
       machineInstance: {
         label: 'Blender',
-        description: 'Blending equipment used',
+        description: 'Blending equipment used (object or token ID)',
       },
       knowHow: {
         label: 'Recipe',
-        description: 'Blending time, speed, and sequence',
+        description: 'Blending time, speed, and sequence (object or token ID)',
       },
     },
   },
@@ -394,6 +420,58 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       facility: {
         label: 'Farm',
         description: 'Where the crop was harvested',
+      },
+    },
+  },
+  PackagingProcess: {
+    name: 'Packaging',
+    description: 'Wrapping or bottling the product',
+    fields: {
+      packaging: {
+        label: 'Materials',
+        description: 'Packaging materials used (boxes, bottles, films)',
+      },
+      machineInstance: {
+        label: 'Machine',
+        description: 'Packaging machine used (e.g. sealer, labeler)',
+      },
+    },
+  },
+  StorageProcess: {
+    name: 'Storage',
+    description: 'Holding products in specific conditions (affecting energy/quality)',
+    fields: {
+      conditions: {
+        label: 'Conditions',
+        description: 'Environment type (ambient, refrigerated, frozen)',
+        examples: ['refrigerated', 'frozen'],
+      },
+      machineInstance: {
+        label: 'Cooling Unit',
+        description: 'Refrigeration or climate control equipment',
+      },
+    },
+  },
+  CookingProcess: {
+    name: 'Cooking',
+    description: 'Thermal processing of food',
+    fields: {
+      method: {
+        label: 'Method',
+        description: 'Cooking technique applied',
+        examples: ['baking', 'boiling', 'frying'],
+      },
+      temperature: {
+        label: 'Temperature',
+        description: 'sustained temperature (C)',
+      },
+      machineInstance: {
+        label: 'Appliance',
+        description: 'Oven, stove, or thermal equipment',
+      },
+      knowHow: {
+        label: 'Recipe',
+        description: 'Cooking instructions',
       },
     },
   },
@@ -459,6 +537,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       max: {
         label: 'Maximum',
         description: 'Highest temperature in Celsius during the process',
+      ratedPowerKW: {
+        label: 'Rated Power (kW)',
+        description: 'Power consumption rating in kilowatts',
+        examples: ['0.5', '1.2', '5.0'],
+      },
         examples: ['25', '80', '150', '200'],
       },
     },

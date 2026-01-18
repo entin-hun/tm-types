@@ -40,10 +40,10 @@ export interface FetchError {
 }
 
 export interface Pokedex {
-  description: string;
-  contract: string;
+  notes: string;
+  roles: string;
   token: string;
-  feedchainVersion: string;
+  typesVersion: string;
   instance: ProductInstance;
 }
 
@@ -60,7 +60,10 @@ export type Process =
   | FreezeDryingProcess
   | BlendingProcess
   | SaleProcess
-  | HarvestProcess;
+  | HarvestProcess
+  | PackagingProcess
+  | StorageProcess
+  | CookingProcess;
 
 export interface GenericProcess {
   timestamp: number;
@@ -74,27 +77,27 @@ export interface GenericProcess {
 
 export interface PrintingProcess extends GenericProcess {
   type: "printing";
-  machineInstance?: MachineInstance;
-  knowHow?: KnowHow;
+  machineInstance?: TokenIdOr<MachineInstance>;
+  knowHow?: TokenIdOr<KnowHow>;
   shape: string /* URL */;
 }
 
 export interface MillingProcess extends GenericProcess {
   type: "milling";
-  knowHow?: KnowHow;
-  machineInstance?: MachineInstance;
+  knowHow?: TokenIdOr<KnowHow>;
+  machineInstance?: TokenIdOr<MachineInstance>;
 }
 
 export interface FreezeDryingProcess extends GenericProcess {
   type: "freezedrying";
-  knowHow?: KnowHow;
-  machineInstance?: MachineInstance;
+  knowHow?: TokenIdOr<KnowHow>;
+  machineInstance?: TokenIdOr<MachineInstance>;
 }
 
 export interface BlendingProcess extends GenericProcess {
   type: "blending";
-  machineInstance?: MachineInstance;
-  knowHow?: KnowHow;
+  machineInstance?: TokenIdOr<MachineInstance>;
+  knowHow?: TokenIdOr<KnowHow>;
 }
 
 export interface SaleProcess extends GenericProcess {
@@ -104,6 +107,26 @@ export interface SaleProcess extends GenericProcess {
 
 export interface HarvestProcess extends GenericProcess {
   type: "harvest";
+}
+
+export interface PackagingProcess extends GenericProcess {
+  type: "packaging";
+  packaging: TokenIdOr<PackagingInstance>[];
+  machineInstance?: TokenIdOr<MachineInstance>;
+}
+
+export interface StorageProcess extends GenericProcess {
+  type: "storage";
+  conditions: "ambient" | "refrigerated" | "frozen" | "controlled-atmosphere";
+  machineInstance?: TokenIdOr<MachineInstance>; // e.g. freezer unit
+}
+
+export interface CookingProcess extends GenericProcess {
+  type: "cooking";
+  method: "baking" | "boiling" | "frying" | "steaming" | "roasting" | "sous-vide" | "grilling";
+  temperature?: number; // C
+  machineInstance?: TokenIdOr<MachineInstance>; // e.g. oven
+  knowHow?: TokenIdOr<KnowHow>;
 }
 
 export interface Price {
@@ -165,7 +188,9 @@ export type EcoLabel =
   | "eu-ecolabel"
   | "blue-angel"
   | "energy-star"
-  | "water-efficient";
+  | "water-efficient"
+  | "palm-oil-free"
+  | "refined-oil-free";
 
 export interface ProductInstanceBase {
   type: string;
@@ -175,7 +200,7 @@ export interface ProductInstanceBase {
   quantity: number;
   price?: Price;
   title?: string;
-  description?: string;
+  notes?: string;
   pictureURL?: string;
 }
 
@@ -192,7 +217,7 @@ export interface FoodInstance extends ProductInstanceBase {
   qualityAttributes?: string[]; // Safety/quality (e.g., pesticide-free)
 }
 
-export interface CartridgeInstance extends ProductInstanceBase {
+export interface NonFoodInstance extends ProductInstanceBase {
   category: "cartridge";
   grade: string;
   size: string;
@@ -201,7 +226,18 @@ export interface CartridgeInstance extends ProductInstanceBase {
   qualityAttributes?: string[]; // Safety/quality (e.g., BPA-free, lead-free)
 }
 
-export type ProductInstance = FoodInstance | CartridgeInstance;
+/** @deprecated Use NonFoodInstance instead */
+export type CartridgeInstance = NonFoodInstance;
+
+export interface PackagingInstance extends ProductInstanceBase {
+  category: "packaging";
+  material: string;
+  labels?: string[];
+  ecoLabels?: EcoLabel[];
+  qualityAttributes?: string[];
+}
+
+export type ProductInstance = FoodInstance | NonFoodInstance | PackagingInstance;
 
 export interface FallbackFoodNutrient {
   amount: number;
@@ -213,6 +249,7 @@ export interface MachineInstance {
   ownerId: string;
   quantity: number;
   size: string;
+  ratedPowerKW?: number;
   hr: Hr;
   providerSDomain: string;
 }

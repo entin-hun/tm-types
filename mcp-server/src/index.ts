@@ -17,7 +17,7 @@ import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import { runExtraction } from "./ai-service.js";
+import { runChat, runExtraction } from "./ai-service.js";
 import { suggestFood } from "./food-service.js";
 import { suggestNonFood, decomposeNonFood } from "./non-food-service.js";
 
@@ -120,6 +120,22 @@ function parseTypeDefinitions(content: string) {
   }
   
   return { interfaces, types };
+}
+
+function buildTypesContext(maxItems = 30): string {
+  try {
+    const content = readTypes();
+    const { interfaces, types } = parseTypeDefinitions(content);
+    const interfaceNames = interfaces.map((i: any) => i.name).slice(0, maxItems);
+    const typeNames = types.map((t: any) => t.name).slice(0, maxItems);
+    return [
+      `Available interfaces (${interfaces.length} total): ${interfaceNames.join(', ')}`,
+      `Available types (${types.length} total): ${typeNames.join(', ')}`
+    ].join('\n');
+  } catch (error: any) {
+    console.error('[HTTP] Failed to build types context:', error?.message || error);
+    return 'Types context unavailable.';
+  }
 }
 
 // Generate TypeScript type from natural language
@@ -434,7 +450,39 @@ function emitAgUi(eventType: string, payload?: any, requestId?: string) {
 const corsOptions = {
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-ai-provider', 'x-ai-model']
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'x-ai-provider',
+    'x-ai-model',
+    'X-AI-Model',
+    'Cache-Control',
+    'cache-control',
+    'Accept',
+    'accept',
+    'Origin',
+    'origin',
+    'Referer',
+    'referer',
+    'User-Agent',
+    'user-agent',
+    'sec-ch-ua',
+    'sec-ch-ua-mobile',
+    'sec-ch-ua-platform',
+    'Accept-Language',
+    'accept-language',
+    'Sec-Fetch-Dest',
+    'sec-fetch-dest',
+    'Sec-Fetch-Mode',
+    'sec-fetch-mode',
+    'Sec-Fetch-Site',
+    'sec-fetch-site',
+    'Sec-GPC',
+    'sec-gpc',
+    'Connection',
+    'connection'
+  ]
 };
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
@@ -533,23 +581,122 @@ app.post('/extract', async (req, res) => {
   }
 });
 
-app.post('/just-chat', async (req, res) => {
+app.post('/decompose/food', async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, attachments } = req.body || {};
+    if (!text && (!attachments || attachments.length === 0)) {
+      return res.status(400).json({ error: "Text or attachments required" });
+    }
+
+    const requestId = randomUUID();
+    emitAgUi('decompose-food-start', {
+      textPreview: typeof text === 'string' ? text.slice(0, 200) : undefined,
+      attachmentCount: attachments?.length || 0
+    }, requestId);
+
+    const authHeader = req.headers.authorization;
+    const providerHeader = req.headers['x-ai-provider'];
+    const modelHeader = req.headers['x-ai-model'];
+
+    let apiKeys: any = {};
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const key = authHeader.split(' ')[1];
+      const provider = (typeof providerHeader === 'string' ? providerHeader.toLowerCase() : 'groq');
+      if (provider.includes('gemini')) apiKeys.geminiKey = key;
+      else if (provider.includes('openrouter')) apiKeys.openRouterKey = key;
+      else apiKeys.groqKey = key;
+    }
+    if (modelHeader && typeof modelHeader === 'string') {
+      apiKeys.modelName = modelHeader;
+    }
+
+    const result = await runExtraction({ text, attachments }, apiKeys);
+    emitAgUi('decompose-food-complete', { ok: true }, requestId);
+    res.json(result);
+  } catch (error: any) {
+    console.error('[HTTP] Decompose Food error:', error);
+    emitAgUi('decompose-food-error', { message: error.message }, undefined);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/chat', async (req, res) => {
+  try {
+    const { text, system, history } = req.body || {};
     if (!text) {
       return res.status(400).json({ error: "Text required" });
     }
+
     const requestId = randomUUID();
-    console.error(`[HTTP] Just chat start requestId=${requestId}`);
-    emitAgUi('just-chat-start', { prompt: text }, requestId);
-    const startedAt = Date.now();
-    const result = await runExtraction({ text }, {});
-    console.error(`[HTTP] Just chat runExtraction complete requestId=${requestId} durationMs=${Date.now() - startedAt}`);
-    emitAgUi('just-chat-complete', { ok: true }, requestId);
-    res.json(result);
+    emitAgUi('chat-start', { prompt: text }, requestId);
+
+    const authHeader = req.headers.authorization;
+    const providerHeader = req.headers['x-ai-provider'];
+    const modelHeader = req.headers['x-ai-model'];
+    const providerName = typeof providerHeader === 'string' ? providerHeader.toLowerCase() : '';
+
+    let apiKeys: any = {};
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const key = authHeader.split(' ')[1];
+      if (providerName.includes('gemini')) apiKeys.geminiKey = key;
+      else if (providerName.includes('openrouter')) apiKeys.openRouterKey = key;
+      else if (providerName.includes('groq')) apiKeys.groqKey = key;
+      else apiKeys.groqKey = key;
+    }
+    if (modelHeader && typeof modelHeader === 'string') {
+      const trimmedModel = modelHeader.trim();
+      if (trimmedModel.length > 0) {
+        const lowerModel = trimmedModel.toLowerCase();
+        const looksGemini = lowerModel.startsWith('models/') || lowerModel.includes('gemini');
+        const looksGroq = /(llama|mixtral|groq|gemma|deepseek|qwen|phi)/i.test(trimmedModel);
+        const looksOpenRouter = /(gpt|claude|sonnet|opus|haiku|openrouter)/i.test(trimmedModel);
+
+        if (providerName.includes('gemini')) {
+          apiKeys.geminiModelName = trimmedModel;
+        } else if (providerName.includes('openrouter')) {
+          apiKeys.openRouterModelName = trimmedModel;
+        } else if (providerName.includes('groq')) {
+          if (looksGemini) {
+            console.error(`[HTTP] Ignoring Gemini model name for Groq provider requestId=${requestId}: ${trimmedModel}`);
+          } else {
+            apiKeys.groqModelName = trimmedModel;
+          }
+        } else if (looksGemini) {
+          apiKeys.geminiModelName = trimmedModel;
+        } else if (looksOpenRouter) {
+          apiKeys.openRouterModelName = trimmedModel;
+        } else if (looksGroq) {
+          apiKeys.groqModelName = trimmedModel;
+        } else {
+          apiKeys.modelName = trimmedModel;
+        }
+      }
+    }
+
+    const typesContext = buildTypesContext();
+    const systemPrompt = [
+      system || 'You are a helpful assistant for Trace Market users.',
+      'Always use the type context below to guide your response and reference the relevant types when applicable.',
+      typesContext
+    ].join('\n\n');
+
+    const result = await runChat({ text, system: systemPrompt, history }, apiKeys, providerName || undefined);
+    const answerRaw = (result as any)?.answer;
+    const answer = typeof answerRaw === 'string'
+      ? answerRaw
+      : answerRaw !== undefined
+        ? JSON.stringify(answerRaw)
+        : undefined;
+    const providedSummary = typeof (result as any)?.summary === 'string'
+      ? String((result as any).summary).trim()
+      : undefined;
+    const summary = providedSummary || (answer ? answer.slice(0, 300) : text.slice(0, 120));
+    const provider = (result as any)?.provider;
+    emitAgUi('chat-complete', { ok: true, summary, answer, provider }, requestId);
+    res.json({ ...result, summary });
   } catch (error: any) {
-    console.error('[HTTP] Just chat error:', error);
-    emitAgUi('just-chat-error', { message: error.message }, undefined);
+    console.error('[HTTP] Chat error:', error);
+    emitAgUi('chat-error', { message: error.message }, undefined);
     res.status(500).json({ error: error.message });
   }
 });
