@@ -234,9 +234,9 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         examples: ['hydrogen', 'electric', 'diesel', 'petrol', 'kerosene'],
       },
       weight: {
-        label: 'Share',
-        description: 'Percentage (0-1) of vehicle capacity used by this product - shown as "Share: X%"',
-        examples: ['0.25 (25%)', '0.5 (50%)', '1.0 (100%)'],
+        label: 'Total Payload (t)',
+        description: 'Total payload capacity of the vehicle in tonnes',
+        examples: ['3.5', '24.0', '40.0'],
       },
       deparetureTime: {
         label: 'Departure Time',
@@ -296,6 +296,10 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       hr: {
         label: 'HR',
         description: 'Human resources assigned to this process',
+      },
+      parameters: {
+        label: 'Parameters',
+        description: 'Process-specific operating parameters (pressure, speed, etc.)',
       },
       knowHow: {
         label: 'Know-How',
@@ -406,6 +410,34 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
     },
   },
+  PyrolysisProcess: {
+    name: 'Pyrolysis',
+    header: 'Thermal decomposition of organic material in the absence of oxygen',
+    fields: {
+      toolInstance: {
+        label: 'Reactor System',
+        description: 'Pyrolysis equipment setup',
+      },
+      knowHow: {
+        label: 'Protocol',
+        description: 'Pyrolysis operating parameters',
+      },
+    },
+  },
+  DistillationProcess: {
+    name: 'Distillation',
+    header: 'Separation of components based on boiling points',
+    fields: {
+      toolInstance: {
+        label: 'Distiller',
+        description: 'Distillation column or reactor',
+      },
+      knowHow: {
+        label: 'Protocol',
+        description: 'Distillation operating parameters',
+      },
+    },
+  },
   Facility: {
     name: 'Facility',
     header: 'A physical location where processing occurs - shown on interactive map',
@@ -506,6 +538,15 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       hash: {
         label: 'Hash',
         description: 'Unique hash identifier for the tool',
+      },
+      specs: {
+        label: 'Specifications',
+        description: 'Technical specifications (material, capacity, pressure, etc.)',
+        examples: ['Material: Steel', 'Max Pressure: 5 bar', 'Capacity: 500kg'],
+      },
+      components: {
+        label: 'Components',
+        description: 'Sub-components of the tool system (e.g. burners, pumps)',
       },
     },
   },
@@ -691,6 +732,8 @@ export function getProcessIcon(processType: string): string {
     milling: 'deblur',
     freezedrying: 'ac_unit',
     harvest: 'agriculture',
+    pyrolysis: 'local_fire_department',
+    distillation: 'science',
   };
   return icons[processType] || 'question_mark';
 }
@@ -708,6 +751,8 @@ export function getProcessLabel(processType: string): string {
     milling: 'Milling',
     freezedrying: 'Freeze-drying',
     harvest: 'Harvesting',
+    pyrolysis: 'Pyrolysis',
+    distillation: 'Distillation',
   };
   return labels[processType] || 'Unknown process';
 }

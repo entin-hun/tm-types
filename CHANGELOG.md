@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-01-19
+
+### ⚠ BREAKING CHANGES
+- **Transport**: `weight` definition changed from "share (0-1)" to "Total vehicle payload in tonnes". This requires data migration for existing records.
+
+### Features
+- **Process Types**: Added `PyrolysisProcess` and `DistillationProcess`.
+- **ToolInstance**: Added `specs` (flexible map for capacity, material, etc.) and `components` (nested tools) to support complex equipment hierarchies like pyrolysis reactors.
+- **Process**: Added `parameters` to `GenericProcess` for capturing real-time or run-specific data (pressure, speed, etc.).
+- **Icons**: Added icons for new processes (`local_fire_department` for Pyrolysis, `science` for Distillation).
+
 ## [0.3.0] - 2026-01-19
 
 ### ⚠ BREAKING CHANGES

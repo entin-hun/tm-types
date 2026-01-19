@@ -61,7 +61,9 @@ export type Process =
   | BlendingProcess
   | SaleProcess
   | HarvestProcess
-  | CookingProcess;
+  | CookingProcess
+  | PyrolysisProcess
+  | DistillationProcess;
 
 export interface GenericProcess {
   timestamp: number;
@@ -72,6 +74,7 @@ export interface GenericProcess {
   impacts?: Impact[];
   price?: Price;
   hr?: Hr;
+  parameters?: Record<string, string | number | boolean>; // Flexible process parameters (pressure, speed, etc.)
 }
 
 export interface PrintingProcess extends GenericProcess {
@@ -115,6 +118,18 @@ export interface CookingProcess extends GenericProcess {
   knowHow?: TokenIdOr<KnowHow>;
 }
 
+export interface PyrolysisProcess extends GenericProcess {
+  type: "pyrolysis";
+  toolInstance?: TokenIdOr<ToolInstance>;
+  knowHow?: TokenIdOr<KnowHow>;
+}
+
+export interface DistillationProcess extends GenericProcess {
+  type: "distillation";
+  toolInstance?: TokenIdOr<ToolInstance>;
+  knowHow?: TokenIdOr<KnowHow>;
+}
+
 export interface Price {
   amount: number;
   currency: string;
@@ -139,7 +154,7 @@ export type InputInstance = LocalInputInstance | TransportedInputInstance;
 export interface Transport {
   method: TransportMethod;
   fuelType: "hydrogen" | "electric" | "diesel" | "petrol" | "kerosene";
-  weight: number;
+  weight: number; // Total vehicle payload capacity in tonnes
   deparetureTime: number;
   duration: number;
 }
@@ -200,6 +215,8 @@ export interface ToolInstance {
   ratedPowerKW?: number;
   providerSDomain: string;
   hash: string;
+  specs?: Record<string, string | number | boolean>; // Flexible specs (material, capacity, pressure)
+  components?: TokenIdOr<ToolInstance>[]; // Sub-components (burners, sensors)
 }
 
 export interface Hr {
