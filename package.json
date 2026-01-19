@@ -1,6 +1,6 @@
 {
   "name": "@trace.market/types",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "TypeScript type definitions for Trace Market food supply chain data",
   "author": "Trace Market Team",
   "license": "MIT",
