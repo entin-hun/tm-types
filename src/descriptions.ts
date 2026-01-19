@@ -514,9 +514,9 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     header: 'Personnel assignment for equipment operation',
     fields: {
       tasks: {
-        label: 'Tasks',
-        description: 'Description of work performed by the operator',
-        examples: ['machine operation', 'quality control', 'supervision'],
+        label: 'Tasks / Steps',
+        description: 'Ordered list of steps to be performed by the operator',
+        examples: ['1. Preheat oven', '2. Mix ingredients', '3. Monitor temperature'],
       },
       assignee: {
         label: 'Assignee',
@@ -537,12 +537,12 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         description: 'Cryptographic hash of the recipe for verification and IP protection',
       },
       inputs: {
-        label: 'Inputs',
-        description: 'Conditions/Rules defining requirements for the input (JSON logic or validation rules)',
+        label: 'Input Rules',
+        description: 'JSONata expression defining requirements for the input (returns true/false)',
       },
       outputs: {
         label: 'Outputs',
-        description: 'Description of the steps to create the output (standard text or structured steps)',
+        description: 'Description of what the process produces',
       },
       licenseFee: {
         label: 'License Fee',

@@ -203,7 +203,7 @@ export interface ToolInstance {
 }
 
 export interface Hr {
-  tasks: string;
+  tasks: string[]; // Ordered list of steps
   assignee: string;
 }
 
@@ -215,7 +215,7 @@ export interface TemperatureRange {
 export interface KnowHow {
   owner: string;
   hash: string;
-  inputs: string | object;
+  inputs: string; // JSONata expression
   outputs: string | object;
   licenseFee: Price;
   note?: string | object;
