@@ -297,9 +297,9 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'HR',
         description: 'Human resources assigned to this process',
       },
-      parameters: {
-        label: 'Parameters',
-        description: 'Process-specific operating parameters (pressure, speed, etc.)',
+      notes: {
+        label: 'Notes',
+        description: 'Even specific operating parameters (pressure, speed, etc.)',
       },
       knowHow: {
         label: 'Know-How',
@@ -538,15 +538,6 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       hash: {
         label: 'Hash',
         description: 'Unique hash identifier for the tool',
-      },
-      specs: {
-        label: 'Specifications',
-        description: 'Technical specifications (material, capacity, pressure, etc.)',
-        examples: ['Material: Steel', 'Max Pressure: 5 bar', 'Capacity: 500kg'],
-      },
-      components: {
-        label: 'Components',
-        description: 'Sub-components of the tool system (e.g. burners, pumps)',
       },
     },
   },

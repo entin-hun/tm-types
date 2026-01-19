@@ -74,7 +74,7 @@ export interface GenericProcess {
   impacts?: Impact[];
   price?: Price;
   hr?: Hr;
-  parameters?: Record<string, string | number | boolean>; // Flexible process parameters (pressure, speed, etc.)
+  notes?: Record<string, string | number | boolean>; // Flexible process parameters (pressure, speed, etc.)
 }
 
 export interface PrintingProcess extends GenericProcess {
@@ -215,8 +215,6 @@ export interface ToolInstance {
   ratedPowerKW?: number;
   providerSDomain: string;
   hash: string;
-  specs?: Record<string, string | number | boolean>; // Flexible specs (material, capacity, pressure)
-  components?: TokenIdOr<ToolInstance>[]; // Sub-components (burners, sensors)
 }
 
 export interface Hr {
