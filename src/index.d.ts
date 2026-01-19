@@ -71,11 +71,12 @@ export interface GenericProcess {
   inputInstances: (TransportedInputInstance | LocalInputInstance)[];
   impacts?: Impact[];
   price?: Price;
+  hr?: Hr;
 }
 
 export interface PrintingProcess extends GenericProcess {
   type: "printing";
-  machineInstance?: TokenIdOr<MachineInstance>;
+  toolInstance?: TokenIdOr<ToolInstance>;
   knowHow?: TokenIdOr<KnowHow>;
   shape: string /* URL */;
 }
@@ -83,18 +84,18 @@ export interface PrintingProcess extends GenericProcess {
 export interface MillingProcess extends GenericProcess {
   type: "milling";
   knowHow?: TokenIdOr<KnowHow>;
-  machineInstance?: TokenIdOr<MachineInstance>;
+  toolInstance?: TokenIdOr<ToolInstance>;
 }
 
 export interface FreezeDryingProcess extends GenericProcess {
   type: "freezedrying";
   knowHow?: TokenIdOr<KnowHow>;
-  machineInstance?: TokenIdOr<MachineInstance>;
+  toolInstance?: TokenIdOr<ToolInstance>;
 }
 
 export interface BlendingProcess extends GenericProcess {
   type: "blending";
-  machineInstance?: TokenIdOr<MachineInstance>;
+  toolInstance?: TokenIdOr<ToolInstance>;
   knowHow?: TokenIdOr<KnowHow>;
 }
 
@@ -110,7 +111,7 @@ export interface HarvestProcess extends GenericProcess {
 export interface CookingProcess extends GenericProcess {
   type: "cooking";
   method: "baking" | "boiling" | "frying" | "steaming" | "roasting" | "sous-vide" | "grilling";
-  machineInstance?: TokenIdOr<MachineInstance>; // e.g. oven
+  toolInstance?: TokenIdOr<ToolInstance>; // e.g. oven
   knowHow?: TokenIdOr<KnowHow>;
 }
 
@@ -191,14 +192,14 @@ export interface FallbackFoodNutrient {
   iD: ID;
 }
 
-export interface MachineInstance {
+export interface ToolInstance {
   category: string;
   ownerId: string;
   quantity: number;
   size: string;
   ratedPowerKW?: number;
-  hr: Hr;
   providerSDomain: string;
+  hash: string;
 }
 
 export interface Hr {
@@ -214,8 +215,8 @@ export interface TemperatureRange {
 export interface KnowHow {
   owner: string;
   hash: string;
-  inputs: string;
-  outputs: string;
+  inputs: string | object;
+  outputs: string | object;
   licenseFee: Price;
   note?: string | object;
   logoURL?: string;

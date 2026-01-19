@@ -1,6 +1,6 @@
 {
   "name": "@trace.market/types",
-  "version": "0.2.1",
+  "version": "0.1.1",
   "description": "TypeScript type definitions for Trace Market food supply chain data",
   "author": "Trace Market Team",
   "license": "MIT",
@@ -20,15 +20,13 @@
   ],
   "scripts": {
     "prepublishOnly": "npm run validate && npm run generate-json",
-    "generate-json": "rm -f src/descriptions.json && npx ts-node generate-json.ts",
+    "generate-json": "npx ts-node generate-json.ts",
     "validate": "tsc --noEmit",
     "version": "git add -A",
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.11",
-    "@types/node": "^25.0.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.3.3"
   }
 }

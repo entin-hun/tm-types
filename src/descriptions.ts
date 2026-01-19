@@ -289,9 +289,13 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         label: 'Price',
         description: 'Cost of this processing step or sale price to customer',
       },
-      machineInstance: {
-        label: 'Machine',
+      toolInstance: {
+        label: 'Tool',
         description: 'Equipment used for processing - can be full data or token ID reference',
+      },
+      hr: {
+        label: 'HR',
+        description: 'Human resources assigned to this process',
       },
       knowHow: {
         label: 'Know-How',
@@ -307,7 +311,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     name: '3D Printing',
     header: 'Additive manufacturing process creating food from cartridges',
     fields: {
-      machineInstance: {
+      toolInstance: {
         label: 'Printer',
         description: '3D food printer used (object or token ID)',
       },
@@ -325,7 +329,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     name: 'Milling',
     header: 'Grinding or crushing process (e.g., wheat to flour)',
     fields: {
-      machineInstance: {
+      toolInstance: {
         label: 'Mill',
         description: 'Milling equipment used (object or token ID)',
       },
@@ -339,7 +343,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     name: 'Freeze-Drying',
     header: 'Lyophilization process removing moisture while preserving nutrients',
     fields: {
-      machineInstance: {
+      toolInstance: {
         label: 'Freeze Dryer',
         description: 'Lyophilization equipment used (object or token ID)',
       },
@@ -353,7 +357,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
     name: 'Blending',
     header: 'Mixing multiple ingredients together',
     fields: {
-      machineInstance: {
+      toolInstance: {
         label: 'Blender',
         description: 'Blending equipment used (object or token ID)',
       },
@@ -392,7 +396,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         description: 'Cooking technique applied',
         examples: ['baking', 'boiling', 'frying'],
       },
-      machineInstance: {
+      toolInstance: {
         label: 'Appliance',
         description: 'Oven, stove, or thermal equipment',
       },
@@ -468,12 +472,12 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
     },
   },
-  MachineInstance: {
-    name: 'Machine',
+  ToolInstance: {
+    name: 'Tool',
     header: 'Equipment used in production processes - displayed with settings icon',
     fields: {
       category: {
-        label: 'Machine Type',
+        label: 'Tool Type',
         description: 'Type of equipment',
         examples: ['3D Printer', 'Mill', 'Blender', 'Freeze Dryer', 'Oven'],
       },
@@ -495,13 +499,13 @@ export const typeDescriptions: Record<string, TypeDescription> = {
         description: 'Power consumption rating in kilowatts',
         examples: ['0.5', '1.2', '5.0'],
       },
-      hr: {
-        label: 'Tasks',
-        description: 'Human resources - who operated the machine',
-      },
       providerSDomain: {
         label: 'Provider',
-        description: 'Equipment manufacturer or supplier domain',
+        description: 'Equipment manufacturer or supplier provider domain',
+      },
+      hash: {
+        label: 'Hash',
+        description: 'Unique hash identifier for the tool',
       },
     },
   },
@@ -534,11 +538,11 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
       inputs: {
         label: 'Inputs',
-        description: 'Description of required input materials',
+        description: 'Conditions/Rules defining requirements for the input (JSON logic or validation rules)',
       },
       outputs: {
         label: 'Outputs',
-        description: 'Description of what the process produces',
+        description: 'Description of the steps to create the output (standard text or structured steps)',
       },
       licenseFee: {
         label: 'License Fee',
