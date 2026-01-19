@@ -145,38 +145,6 @@ export interface Transport {
 
 export type TransportMethod = "air" | "sea" | "land";
 
-export type EcoLabel =
-  | "organic"
-  | "fair-trade"
-  | "carbon-neutral"
-  | "plastic-free"
-  | "bpa-free"
-  | "non-gmo"
-  | "recyclable"
-  | "biodegradable"
-  | "compostable"
-  | "fsc-certified"
-  | "rainforest-alliance"
-  | "cruelty-free"
-  | "vegan"
-  | "vegetarian"
-  | "gluten-free"
-  | "dairy-free"
-  | "local"
-  | "seasonal"
-  | "sustainable-sourcing"
-  | "renewable-energy"
-  | "zero-waste"
-  | "upcycled"
-  | "regenerative"
-  | "b-corp"
-  | "eu-ecolabel"
-  | "blue-angel"
-  | "energy-star"
-  | "water-efficient"
-  | "palm-oil-free"
-  | "refined-oil-free";
-
 export interface ProductInstanceBase {
   type: string;
   ownerId?: string;
@@ -197,18 +165,14 @@ export interface FoodInstance extends ProductInstanceBase {
   grade?: string;
   size?: string;
   process?: Process;
-  labels?: string[]; // Flexible food attributes (e.g., "low-sugar", "keto")
-  ecoLabels?: EcoLabel[]; // Eco certifications (e.g., organic, fair-trade)
-  qualityAttributes?: string[]; // Safety/quality (e.g., pesticide-free)
+  labels?: string[]; // Flexible food attributes (e.g., "low-sugar", "keto", "organic", "fair-trade")
 }
 
 export interface NonFoodInstance extends ProductInstanceBase {
-  category: "cartridge";
+  category: "non-food";
   grade: string;
   size: string;
-  labels?: string[]; // Flexible cartridge attributes (e.g., "food-safe")
-  ecoLabels?: EcoLabel[]; // Eco certifications (e.g., recyclable)
-  qualityAttributes?: string[]; // Safety/quality (e.g., BPA-free, lead-free)
+  labels?: string[]; // Flexible non-food attributes (e.g., "food-safe", "recyclable")
 }
 
 /** @deprecated Use NonFoodInstance instead */
@@ -218,8 +182,6 @@ export interface PackagingInstance extends ProductInstanceBase {
   category: "packaging";
   material: string;
   labels?: string[];
-  ecoLabels?: EcoLabel[];
-  qualityAttributes?: string[];
 }
 
 export type ProductInstance = FoodInstance | NonFoodInstance | PackagingInstance;

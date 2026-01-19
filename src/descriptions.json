@@ -54,7 +54,7 @@
         "description": "Main category determining how the product is processed and displayed",
         "examples": [
           "food",
-          "cartridge"
+          "non-food"
         ]
       },
       "expiryDate": {
@@ -87,19 +87,13 @@
       },
       "labels": {
         "label": "Labels",
-        "description": "Flexible array for any certification, attribute, or quality highlight",
+        "description": "Any standard is accepted, related to Health and eco impact.",
         "examples": [
           "Kosher",
           "Halal",
           "Lactose-free",
           "Paleo",
-          "Keto-friendly"
-        ]
-      },
-      "ecoLabels": {
-        "label": "Eco Labels",
-        "description": "Standardized environmental and sustainability certifications",
-        "examples": [
+          "Keto-friendly",
           "organic",
           "fair-trade",
           "carbon-neutral",
@@ -108,13 +102,7 @@
           "recyclable",
           "fsc-certified",
           "palm-oil-free",
-          "refined-oil-free"
-        ]
-      },
-      "qualityAttributes": {
-        "label": "Quality Attributes",
-        "description": "Safety and quality highlights displayed as badges",
-        "examples": [
+          "refined-oil-free",
           "BPA-free",
           "Lead-free",
           "Phthalate-free",
@@ -182,31 +170,19 @@
       },
       "labels": {
         "label": "Labels",
-        "description": "Food-specific attributes and marketing highlights",
+        "description": "Any standard is accepted, related to Health and eco impact.",
         "examples": [
           "low-sugar",
           "keto",
           "halal",
           "kosher",
           "lactose-free",
-          "nut-free"
-        ]
-      },
-      "ecoLabels": {
-        "label": "Eco Labels",
-        "description": "Environmental and sustainability certifications for food products",
-        "examples": [
+          "nut-free",
           "organic",
           "fair-trade",
           "carbon-neutral",
           "plastic-free",
-          "non-gmo"
-        ]
-      },
-      "qualityAttributes": {
-        "label": "Quality Attributes",
-        "description": "Safety/quality highlights shown as badges",
-        "examples": [
+          "non-gmo",
           "pesticide-free",
           "hormone-free",
           "antibiotic-free",
@@ -241,28 +217,16 @@
       },
       "labels": {
         "label": "Labels",
-        "description": "Attributes and usage notes",
+        "description": "Any standard is accepted, related to Health and eco impact.",
         "examples": [
           "food-safe",
           "single-use",
           "refillable",
-          "heat-resistant"
-        ]
-      },
-      "ecoLabels": {
-        "label": "Eco Labels",
-        "description": "Environmental certifications",
-        "examples": [
+          "heat-resistant",
           "recyclable",
           "biodegradable",
           "compostable",
-          "fsc-certified"
-        ]
-      },
-      "qualityAttributes": {
-        "label": "Quality Attributes",
-        "description": "Safety/quality highlights",
-        "examples": [
+          "fsc-certified",
           "BPA-free",
           "lead-free",
           "phthalate-free",
@@ -287,26 +251,14 @@
       },
       "labels": {
         "label": "Labels",
-        "description": "Packaging attributes",
+        "description": "Any standard is accepted, related to Health and eco impact.",
         "examples": [
           "reusable",
-          "single-use"
-        ]
-      },
-      "ecoLabels": {
-        "label": "Eco Labels",
-        "description": "Environmental certifications for packaging",
-        "examples": [
+          "single-use",
           "recyclable",
           "compostable",
           "fsc-certified",
-          "plastic-free"
-        ]
-      },
-      "qualityAttributes": {
-        "label": "Quality Attributes",
-        "description": "Safety/quality highlights",
-        "examples": [
+          "plastic-free",
           "food-safe",
           "BPA-free"
         ]

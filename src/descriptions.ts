@@ -59,7 +59,7 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       category: {
         label: 'Category',
         description: 'Main category determining how the product is processed and displayed',
-        examples: ['food', 'cartridge'],
+        examples: ['food', 'non-food'],
       },
       expiryDate: {
         label: 'Expiry Date',
@@ -91,18 +91,8 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
       labels: {
         label: 'Labels',
-        description: 'Flexible array for any certification, attribute, or quality highlight',
-        examples: ['Kosher', 'Halal', 'Lactose-free', 'Paleo', 'Keto-friendly'],
-      },
-      ecoLabels: {
-        label: 'Eco Labels',
-        description: 'Standardized environmental and sustainability certifications',
-        examples: ['organic', 'fair-trade', 'carbon-neutral', 'bpa-free', 'non-gmo', 'recyclable', 'fsc-certified', 'palm-oil-free', 'refined-oil-free'],
-      },
-      qualityAttributes: {
-        label: 'Quality Attributes',
-        description: 'Safety and quality highlights displayed as badges',
-        examples: ['BPA-free', 'Lead-free', 'Phthalate-free', 'Pesticide-free', 'Hormone-free'],
+        description: 'Any standard is accepted, related to Health and eco impact.',
+        examples: ['Kosher', 'Halal', 'Lactose-free', 'Paleo', 'Keto-friendly', 'organic', 'fair-trade', 'carbon-neutral', 'bpa-free', 'non-gmo', 'recyclable', 'fsc-certified', 'palm-oil-free', 'refined-oil-free', 'BPA-free', 'Lead-free', 'Phthalate-free', 'Pesticide-free', 'Hormone-free'],
       },
     },
   },
@@ -140,18 +130,8 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
       labels: {
         label: 'Labels',
-        description: 'Food-specific attributes and marketing highlights',
-        examples: ['low-sugar', 'keto', 'halal', 'kosher', 'lactose-free', 'nut-free'],
-      },
-      ecoLabels: {
-        label: 'Eco Labels',
-        description: 'Environmental and sustainability certifications for food products',
-        examples: ['organic', 'fair-trade', 'carbon-neutral', 'plastic-free', 'non-gmo'],
-      },
-      qualityAttributes: {
-        label: 'Quality Attributes',
-        description: 'Safety/quality highlights shown as badges',
-        examples: ['pesticide-free', 'hormone-free', 'antibiotic-free', 'cold-pressed'],
+        description: 'Any standard is accepted, related to Health and eco impact.',
+        examples: ['low-sugar', 'keto', 'halal', 'kosher', 'lactose-free', 'nut-free', 'organic', 'fair-trade', 'carbon-neutral', 'plastic-free', 'non-gmo', 'pesticide-free', 'hormone-free', 'antibiotic-free', 'cold-pressed'],
       },
     },
   },
@@ -171,18 +151,8 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
       labels: {
         label: 'Labels',
-        description: 'Attributes and usage notes',
-        examples: ['food-safe', 'single-use', 'refillable', 'heat-resistant'],
-      },
-      ecoLabels: {
-        label: 'Eco Labels',
-        description: 'Environmental certifications',
-        examples: ['recyclable', 'biodegradable', 'compostable', 'fsc-certified'],
-      },
-      qualityAttributes: {
-        label: 'Quality Attributes',
-        description: 'Safety/quality highlights',
-        examples: ['BPA-free', 'lead-free', 'phthalate-free', 'food-contact safe'],
+        description: 'Any standard is accepted, related to Health and eco impact.',
+        examples: ['food-safe', 'single-use', 'refillable', 'heat-resistant', 'recyclable', 'biodegradable', 'compostable', 'fsc-certified', 'BPA-free', 'lead-free', 'phthalate-free', 'food-contact safe'],
       },
     },
   },
@@ -197,18 +167,8 @@ export const typeDescriptions: Record<string, TypeDescription> = {
       },
       labels: {
         label: 'Labels',
-        description: 'Packaging attributes',
-        examples: ['reusable', 'single-use'],
-      },
-      ecoLabels: {
-        label: 'Eco Labels',
-        description: 'Environmental certifications for packaging',
-        examples: ['recyclable', 'compostable', 'fsc-certified', 'plastic-free'],
-      },
-      qualityAttributes: {
-        label: 'Quality Attributes',
-        description: 'Safety/quality highlights',
-        examples: ['food-safe', 'BPA-free'],
+        description: 'Any standard is accepted, related to Health and eco impact.',
+        examples: ['reusable', 'single-use', 'recyclable', 'compostable', 'fsc-certified', 'plastic-free', 'food-safe', 'BPA-free'],
       },
     },
   },
